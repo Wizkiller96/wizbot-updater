@@ -35,18 +35,6 @@ namespace upeko.ViewModels
             set => this.RaiseAndSetIfChanged(ref _version, value);
         }
         
-        public string Platform
-        {
-            get => _platform;
-            set => this.RaiseAndSetIfChanged(ref _platform, value);
-        }
-        
-        public string Architecture
-        {
-            get => _architecture;
-            set => this.RaiseAndSetIfChanged(ref _architecture, value);
-        }
-        
         public string Location
         {
             get => _location;
@@ -73,8 +61,6 @@ namespace upeko.ViewModels
             _name = botItem.Name;
             _iconSource = botItem.IconSource;
             _version = botItem.Version;
-            _platform = botItem.Platform;
-            _architecture = botItem.Architecture;
             _location = botItem.Location;
             _status = botItem.Status;
             

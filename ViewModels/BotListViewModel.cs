@@ -42,8 +42,6 @@ public class BotListViewModel : ViewModelBase
                 Name = "Bot 1",
                 IconSource = null, // Default icon will be used
                 Version = "1.0.0",
-                Platform = "Windows",
-                Architecture = "x64",
                 Location = "C:\\Bots\\Bot1"
             },
             new()
@@ -51,8 +49,6 @@ public class BotListViewModel : ViewModelBase
                 Name = "Bot 2",
                 IconSource = null, // Default icon will be used
                 Version = "1.0.0",
-                Platform = "Windows",
-                Architecture = "x64",
                 Location = "C:\\Bots\\Bot2"
             },
             new()
@@ -60,8 +56,6 @@ public class BotListViewModel : ViewModelBase
                 Name = "Bot 3",
                 IconSource = null, // Default icon will be used
                 Version = "1.0.0",
-                Platform = "Windows",
-                Architecture = "x64",
                 Location = "C:\\Bots\\Bot3"
             }
         });
@@ -95,8 +89,6 @@ public class BotListViewModel : ViewModelBase
             Name = botName,
             IconSource = null, // Default icon will be used
             Version = "1.0.0",
-            Platform = "Windows",
-            Architecture = "x64",
             Location = $"C:\\Bots\\{botName.Replace(" ", "")}"
         };
         
@@ -149,18 +141,6 @@ public class BotItemViewModel : ViewModelBase
     {
         get => _version;
         set => this.RaiseAndSetIfChanged(ref _version, value);
-    }
-    
-    public string Platform
-    {
-        get => _platform;
-        set => this.RaiseAndSetIfChanged(ref _platform, value);
-    }
-    
-    public string Architecture
-    {
-        get => _architecture;
-        set => this.RaiseAndSetIfChanged(ref _architecture, value);
     }
     
     public string Location

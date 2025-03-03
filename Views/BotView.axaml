@@ -49,12 +49,6 @@
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Version:" Margin="0,0,10,5" FontWeight="SemiBold" Foreground="#323130"/>
                     <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Version}" Margin="0,0,0,5" Foreground="#323130"/>
                     
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Platform:" Margin="0,0,10,5" FontWeight="SemiBold" Foreground="#323130"/>
-                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Platform}" Margin="0,0,0,5" Foreground="#323130"/>
-                    
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Architecture:" Margin="0,0,10,5" FontWeight="SemiBold" Foreground="#323130"/>
-                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Architecture}" Margin="0,0,0,5" Foreground="#323130"/>
-                    
                     <TextBlock Grid.Row="3" Grid.Column="0" Text="Location:" Margin="0,0,10,5" FontWeight="SemiBold" Foreground="#323130"/>
                     <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Location}" Margin="0,0,0,5" Foreground="#323130"/>
                 </Grid>
