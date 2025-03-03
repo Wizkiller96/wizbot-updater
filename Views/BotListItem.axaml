@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:upeko.ViewModels"
+             mc:Ignorable="d"
+             x:Class="upeko.Views.BotListItem"
+             x:DataType="viewModels:BotItemViewModel">
+    <Button Command="{Binding OpenBotCommand}" 
+            HorizontalAlignment="Stretch" 
+            VerticalAlignment="Stretch"
+            Background="White"
+            Foreground="#323130"
+            BorderBrush="#E1E1E1"
+            BorderThickness="1"
+            CornerRadius="4"
+            Padding="10"
+            Margin="5">
+        <Grid ColumnDefinitions="Auto,*">
+            <Image Grid.Column="0" 
+                   Source="{Binding IconSource}" 
+                   Width="48" 
+                   Height="48" 
+                   Margin="0,0,10,0"/>
+            <TextBlock Grid.Column="1" 
+                       Text="{Binding Name}" 
+                       VerticalAlignment="Center" 
+                       FontSize="16"
+                       Foreground="#323130"/>
+        </Grid>
+    </Button>
+</UserControl>

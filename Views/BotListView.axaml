@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:upeko.ViewModels"
+             xmlns:views="clr-namespace:upeko.Views"
+             mc:Ignorable="d"
+             x:Class="upeko.Views.BotListView"
+             x:DataType="viewModels:BotListViewModel"
+             Height="400">
+    <ContentControl Content="{Binding CurrentPage}">
+        <ContentControl.DataTemplates>
+            <DataTemplate DataType="{x:Type viewModels:BotListViewModel}">
+                <Grid RowDefinitions="*">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="0">
+                        <ItemsControl ItemsSource="{Binding AllItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ContentControl Content="{Binding}" Height="200">
+                                        <ContentControl.DataTemplates>
+                                            <DataTemplate DataType="{x:Type viewModels:BotItemViewModel}">
+                                                <views:BotListItem />
+                                            </DataTemplate>
+                                            <DataTemplate DataType="{x:Type viewModels:AddButtonViewModel}">
+                                                <Button
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
+                                                    Margin="5"
+                                                    Padding="10"
+                                                    BorderThickness="1"
+                                                    Command="{Binding AddCommand}">
+                                                    <PathIcon Data="{StaticResource plus}" />
+                                                </Button>
+                                            </DataTemplate>
+                                        </ContentControl.DataTemplates>
+                                    </ContentControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:BotViewModel}">
+                <views:BotView />
+            </DataTemplate>
+        </ContentControl.DataTemplates>
+    </ContentControl>
+</UserControl>

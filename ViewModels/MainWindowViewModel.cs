@@ -2,14 +2,16 @@
 using System.Reactive.Linq;
 using System.Windows.Input;
 using ReactiveUI;
+using upeko.Views;
 
 namespace upeko.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     public ICommand AddBotCommand { get; }
-    
     public Interaction<AddBotViewModel, AddBotOutputViewModel?> ShowAddBotDialog { get; }
+    
+    public BotListViewModel Bots { get; } = new();
 
     public MainWindowViewModel()
     {
