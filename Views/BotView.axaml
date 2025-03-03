@@ -6,23 +6,43 @@
              mc:Ignorable="d"
              x:Class="upeko.Views.BotView"
              x:DataType="viewModels:BotViewModel">
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*,Auto">
         <!-- Header -->
-        <StackPanel Grid.Row="0" Margin="20">
+        <Border Grid.Row="0" 
+                Background="#F9F9F9" 
+                BorderBrush="#E1E1E1" 
+                BorderThickness="0,0,0,1" 
+                Padding="20">
             <Grid ColumnDefinitions="Auto,*,Auto">
-                <Image Grid.Column="0" 
-                       Source="{Binding IconSource}" 
-                       Width="64" 
-                       Height="64" 
-                       Margin="0,0,20,0"/>
-                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <Border Grid.Column="0" 
+                        Background="#0078D7" 
+                        CornerRadius="8" 
+                        Width="64" 
+                        Height="64" 
+                        Margin="0,0,20,0"
+                        ClipToBounds="True">
+                    <Image Source="{Binding IconSource}" 
+                           Width="40" 
+                           Height="40"/>
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
                     <TextBlock Text="{Binding Name}" 
                                FontSize="24" 
                                FontWeight="SemiBold"
                                Foreground="#323130"/>
-                    <TextBlock Text="{Binding Status}" 
-                               FontSize="14"
-                               Foreground="#605E5C"/>
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Border Background="{Binding StatusColor}" 
+                                CornerRadius="4" 
+                                Padding="8,4">
+                            <TextBlock Text="{Binding Status}" 
+                                       FontSize="12"
+                                       Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="{Binding Version}" 
+                                   FontSize="12"
+                                   Foreground="#605E5C"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
                 <Button Grid.Column="2" 
                         Command="{Binding BackCommand}"
@@ -30,60 +50,182 @@
                         Foreground="#323130"
                         BorderBrush="#E1E1E1"
                         BorderThickness="1"
-                        Padding="10,5">
-                    <TextBlock Text="Back"/>
+                        CornerRadius="4"
+                        Padding="12,8">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <PathIcon Data="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z" Width="16" Height="16"/>
+                        <TextBlock Text="Back"/>
+                    </StackPanel>
                 </Button>
             </Grid>
-        </StackPanel>
+        </Border>
         
         <!-- Content -->
-        <ScrollViewer Grid.Row="1">
-            <StackPanel Margin="20">
-                <TextBlock Text="Bot Information" 
-                           FontSize="18" 
-                           FontWeight="SemiBold"
-                           Margin="0,0,0,10"
-                           Foreground="#323130"/>
-                
-                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" Margin="0,10">
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Version:" Margin="0,0,10,5" FontWeight="SemiBold" Foreground="#323130"/>
-                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding Version}" Margin="0,0,0,5" Foreground="#323130"/>
-                    
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Location:" Margin="0,0,10,5" FontWeight="SemiBold" Foreground="#323130"/>
-                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Location}" Margin="0,0,0,5" Foreground="#323130"/>
-                </Grid>
-                
-                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                    <Button Command="{Binding StartCommand}"
-                            Background="#0078D7"
-                            Foreground="White"
+        <TabControl Grid.Row="1" Margin="0" Padding="0">
+            <TabItem Header="Information">
+                <ScrollViewer>
+                    <Border Background="White" Padding="20">
+                        <StackPanel Spacing="20">
+                            <StackPanel>
+                                <TextBlock Text="Bot Information" 
+                                           FontSize="18" 
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,12"
+                                           Foreground="#323130"/>
+                                
+                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,20">
+                                    <Border Grid.Row="0" Grid.Column="0" 
+                                            Background="#F4F4F4" 
+                                            Padding="10,8" 
+                                            Margin="0,0,12,8" 
+                                            CornerRadius="4" 
+                                            Width="120">
+                                        <TextBlock Text="Version" 
+                                                   FontWeight="SemiBold" 
+                                                   Foreground="#323130" 
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="1" 
+                                            Background="#F9F9F9" 
+                                            Padding="12,8" 
+                                            Margin="0,0,0,8" 
+                                            CornerRadius="4">
+                                        <TextBlock Text="{Binding Version}" Foreground="#323130"/>
+                                    </Border>
+                                    
+                                    <Border Grid.Row="1" Grid.Column="0" 
+                                            Background="#F4F4F4" 
+                                            Padding="10,8" 
+                                            Margin="0,0,12,8" 
+                                            CornerRadius="4" 
+                                            Width="120">
+                                        <TextBlock Text="Location" 
+                                                   FontWeight="SemiBold" 
+                                                   Foreground="#323130" 
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="1" Grid.Column="1" 
+                                            Background="#F9F9F9" 
+                                            Padding="12,8" 
+                                            Margin="0,0,0,8" 
+                                            CornerRadius="4">
+                                        <TextBlock Text="{Binding Location}" 
+                                                   Foreground="#323130"
+                                                   TextWrapping="Wrap"/>
+                                    </Border>
+                                    
+                                    <Border Grid.Row="2" Grid.Column="0" 
+                                            Background="#F4F4F4" 
+                                            Padding="10,8" 
+                                            Margin="0,0,12,8" 
+                                            CornerRadius="4" 
+                                            Width="120">
+                                        <TextBlock Text="Last Updated" 
+                                                   FontWeight="SemiBold" 
+                                                   Foreground="#323130" 
+                                                   HorizontalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Row="2" Grid.Column="1" 
+                                            Background="#F9F9F9" 
+                                            Padding="12,8" 
+                                            Margin="0,0,0,8" 
+                                            CornerRadius="4">
+                                        <TextBlock Text="{Binding LastUpdated}" Foreground="#323130"/>
+                                    </Border>
+                                </Grid>
+                            </StackPanel>
+                            
+                            <StackPanel>
+                                <TextBlock Text="Configuration" 
+                                           FontSize="18" 
+                                           FontWeight="SemiBold"
+                                           Margin="0,0,0,12"
+                                           Foreground="#323130"/>
+                                
+                                <Border Background="#F9F9F9" 
+                                        CornerRadius="4" 
+                                        Padding="12" 
+                                        BorderBrush="#E1E1E1" 
+                                        BorderThickness="1">
+                                    <StackPanel Spacing="8">
+                                        <CheckBox Content="Start bot on application launch" 
+                                                  IsChecked="{Binding AutoStart}"
+                                                  Foreground="#323130"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Console">
+                <Border Background="#1E1E1E" Padding="12">
+                    <ScrollViewer>
+                        <TextBlock Text="{Binding ConsoleOutput}" 
+                                   FontFamily="Consolas, Menlo, Monaco, 'Courier New', monospace"
+                                   FontSize="14"
+                                   Foreground="#CCCCCC"
+                                   TextWrapping="Wrap"/>
+                    </ScrollViewer>
+                </Border>
+            </TabItem>
+        </TabControl>
+        
+        <!-- Footer -->
+        <Border Grid.Row="2" 
+                Background="#F9F9F9" 
+                BorderBrush="#E1E1E1" 
+                BorderThickness="0,1,0,0" 
+                Padding="20">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Left"
+                            Spacing="12">
+                    <Button Command="{Binding ToggleRunningCommand}"
+                            Background="{Binding RunButtonBackground}"
+                            Foreground="{Binding RunButtonForeground}"
                             BorderThickness="0"
-                            Padding="15,8"
-                            Margin="0,0,10,0"
-                            CornerRadius="4">
-                        <TextBlock Text="Start Bot"/>
+                            Padding="15,10"
+                            CornerRadius="4"
+                            Width="120">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="{Binding RunButtonIcon}" Width="16" Height="16"/>
+                            <TextBlock Text="{Binding RunButtonText}"/>
+                        </StackPanel>
                     </Button>
-                    <Button Command="{Binding StopCommand}"
+                </StackPanel>
+                
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Right"
+                            Spacing="12">
+                    <Button Command="{Binding OpenFolderCommand}"
                             Background="#F4F4F4"
                             Foreground="#323130"
                             BorderBrush="#E1E1E1"
                             BorderThickness="1"
-                            Padding="15,8"
-                            Margin="0,0,10,0"
+                            Padding="15,10"
                             CornerRadius="4">
-                        <TextBlock Text="Stop Bot"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z" Width="16" Height="16"/>
+                            <TextBlock Text="Open Folder"/>
+                        </StackPanel>
                     </Button>
                     <Button Command="{Binding UpdateCommand}"
                             Background="#F4F4F4"
                             Foreground="#323130"
                             BorderBrush="#E1E1E1"
                             BorderThickness="1"
-                            Padding="15,8"
+                            Padding="15,10"
                             CornerRadius="4">
-                        <TextBlock Text="Update Bot"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <PathIcon Data="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z" Width="16" Height="16"/>
+                            <TextBlock Text="Update"/>
+                        </StackPanel>
                     </Button>
                 </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
 
@@ -42,21 +43,24 @@ public class BotListViewModel : ViewModelBase
                 Name = "Bot 1",
                 IconSource = null, // Default icon will be used
                 Version = "1.0.0",
-                Location = "C:\\Bots\\Bot1"
+                Location = "C:\\Bots\\Bot1",
+                Status = "Stopped"
             },
             new()
             {
                 Name = "Bot 2",
                 IconSource = null, // Default icon will be used
                 Version = "1.0.0",
-                Location = "C:\\Bots\\Bot2"
+                Location = "C:\\Bots\\Bot2",
+                Status = "Running"
             },
             new()
             {
                 Name = "Bot 3",
                 IconSource = null, // Default icon will be used
                 Version = "1.0.0",
-                Location = "C:\\Bots\\Bot3"
+                Location = "C:\\Bots\\Bot3",
+                Status = "Stopped"
             }
         });
         
@@ -89,7 +93,8 @@ public class BotListViewModel : ViewModelBase
             Name = botName,
             IconSource = null, // Default icon will be used
             Version = "1.0.0",
-            Location = $"C:\\Bots\\{botName.Replace(" ", "")}"
+            Location = $"C:\\Bots\\{botName.Replace(" ", "")}",
+            Status = "Stopped"
         };
         
         // Add to the items collection
@@ -120,8 +125,6 @@ public class BotItemViewModel : ViewModelBase
     private string _name = string.Empty;
     private Bitmap _iconSource;
     private string _version = string.Empty;
-    private string _platform = string.Empty;
-    private string _architecture = string.Empty;
     private string _location = string.Empty;
     private string _status = "Stopped";
 
@@ -153,6 +156,21 @@ public class BotItemViewModel : ViewModelBase
     {
         get => _status;
         set => this.RaiseAndSetIfChanged(ref _status, value);
+    }
+    
+    public IBrush StatusColor
+    {
+        get
+        {
+            return Status switch
+            {
+                "Running" => new SolidColorBrush(Color.Parse("#107C10")), // Green
+                "Stopped" => new SolidColorBrush(Color.Parse("#797775")), // Gray
+                "Error" => new SolidColorBrush(Color.Parse("#D83B01")),   // Red
+                "Updating..." => new SolidColorBrush(Color.Parse("#0078D7")), // Blue
+                _ => new SolidColorBrush(Color.Parse("#797775"))          // Default gray
+            };
+        }
     }
     
     public ICommand OpenBotCommand => ReactiveCommand.Create(ExecuteOpenBot);
