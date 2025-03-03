@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
+using upeko.Models;
 
 namespace upeko.ViewModels;
 
@@ -36,33 +37,18 @@ public class BotListViewModel : ViewModelBase
 
     public BotListViewModel()
     {
-        _items = new(new()
+        // Create sample bot models
+        var bot1 = new BotModel("Bot 1", "C:\\Bots\\Bot1");
+        var bot2 = new BotModel("Bot 2", "C:\\Bots\\Bot2");
+        var bot3 = new BotModel("Bot 3", "C:\\Bots\\Bot3");
+        
+        // Create view models from the models
+        _items = new ObservableCollection<BotItemViewModel?>
         {
-            new()
-            {
-                Name = "Bot 1",
-                IconSource = null, // Default icon will be used
-                Version = "1.0.0",
-                Location = "C:\\Bots\\Bot1",
-                Status = "Stopped"
-            },
-            new()
-            {
-                Name = "Bot 2",
-                IconSource = null, // Default icon will be used
-                Version = "1.0.0",
-                Location = "C:\\Bots\\Bot2",
-                Status = "Running"
-            },
-            new()
-            {
-                Name = "Bot 3",
-                IconSource = null, // Default icon will be used
-                Version = "1.0.0",
-                Location = "C:\\Bots\\Bot3",
-                Status = "Stopped"
-            }
-        });
+            new BotItemViewModel(bot1),
+            new BotItemViewModel(bot2) { Status = "Running" },
+            new BotItemViewModel(bot3)
+        };
         
         // Create the combined collection with bot items and the add button
         _allItems = new ObservableCollection<ViewModelBase>();
@@ -88,14 +74,11 @@ public class BotListViewModel : ViewModelBase
         var botCount = _items.Count + 1;
         var botName = string.IsNullOrEmpty(name) ? $"Bot {botCount}" : name;
         
-        var newBot = new BotItemViewModel
-        {
-            Name = botName,
-            IconSource = null, // Default icon will be used
-            Version = "1.0.0",
-            Location = $"C:\\Bots\\{botName.Replace(" ", "")}",
-            Status = "Stopped"
-        };
+        // Create a new bot model
+        var botModel = new BotModel(botName);
+        
+        // Create a view model from the model
+        var newBot = new BotItemViewModel(botModel);
         
         // Add to the items collection
         _items.Add(newBot);
@@ -122,40 +105,76 @@ public class BotListViewModel : ViewModelBase
 
 public class BotItemViewModel : ViewModelBase
 {
-    private string _name = string.Empty;
-    private Bitmap _iconSource;
-    private string _version = string.Empty;
-    private string _location = string.Empty;
+    private readonly BotModel _model;
+    private BotListViewModel _parent;
     private string _status = "Stopped";
-
+    
+    public BotModel Model => _model;
+    
     public string Name
     {
-        get => _name;
-        set => this.RaiseAndSetIfChanged(ref _name, value);
+        get => _model.Name;
+        set
+        {
+            if (_model.Name != value)
+            {
+                _model.Name = value;
+                this.RaisePropertyChanged();
+            }
+        }
     }
     
     public Bitmap IconSource
     {
-        get => _iconSource;
-        set => this.RaiseAndSetIfChanged(ref _iconSource, value);
+        get => _model.Icon;
+        set
+        {
+            if (_model.Icon != value)
+            {
+                _model.Icon = value;
+                this.RaisePropertyChanged();
+            }
+        }
     }
     
     public string Version
     {
-        get => _version;
-        set => this.RaiseAndSetIfChanged(ref _version, value);
+        get => _model.Version;
+        set
+        {
+            if (_model.Version != value)
+            {
+                _model.Version = value;
+                this.RaisePropertyChanged();
+            }
+        }
     }
     
     public string Location
     {
-        get => _location;
-        set => this.RaiseAndSetIfChanged(ref _location, value);
+        get => _model.Location;
+        set
+        {
+            if (_model.Location != value)
+            {
+                _model.Location = value;
+                this.RaisePropertyChanged();
+            }
+        }
     }
     
     public string Status
     {
         get => _status;
-        set => this.RaiseAndSetIfChanged(ref _status, value);
+        set
+        {
+            if (_status != value)
+            {
+                _status = value;
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(StatusColor));
+            }
+        }
     }
     
     public IBrush StatusColor
@@ -175,11 +194,16 @@ public class BotItemViewModel : ViewModelBase
     
     public ICommand OpenBotCommand => ReactiveCommand.Create(ExecuteOpenBot);
     
-    private BotListViewModel _parent;
-    
-    public BotItemViewModel()
+    public BotItemViewModel(BotModel model)
     {
-        // This constructor is used for design-time data
+        _model = model;
+        
+        // Subscribe to model property changes
+        _model.PropertyChanged += (sender, args) =>
+        {
+            // When the model changes, raise property changed for the corresponding property
+            this.RaisePropertyChanged(args.PropertyName);
+        };
     }
     
     private void ExecuteOpenBot()

@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using ReactiveUI;
+using upeko.Models;
 
 namespace upeko.ViewModels
 {
@@ -11,52 +12,75 @@ namespace upeko.ViewModels
     {
         private readonly BotListViewModel _parent;
         private readonly BotItemViewModel _botItem;
+        private readonly BotModel _model;
         
-        private string _name;
-        private Bitmap _iconSource;
-        private string _version;
-        private string _location;
-        private string _status;
         private string _consoleOutput;
-        private string _lastUpdated;
-        private bool _autoStart;
         
         public string Name
         {
-            get => _name;
-            set => this.RaiseAndSetIfChanged(ref _name, value);
+            get => _model.Name;
+            set
+            {
+                if (_model.Name != value)
+                {
+                    _model.Name = value;
+                    this.RaisePropertyChanged();
+                }
+            }
         }
         
         public Bitmap IconSource
         {
-            get => _iconSource;
-            set => this.RaiseAndSetIfChanged(ref _iconSource, value);
+            get => _model.Icon;
+            set
+            {
+                if (_model.Icon != value)
+                {
+                    _model.Icon = value;
+                    this.RaisePropertyChanged();
+                }
+            }
         }
         
         public string Version
         {
-            get => _version;
-            set => this.RaiseAndSetIfChanged(ref _version, value);
+            get => _model.Version;
+            set
+            {
+                if (_model.Version != value)
+                {
+                    _model.Version = value;
+                    this.RaisePropertyChanged();
+                }
+            }
         }
         
         public string Location
         {
-            get => _location;
-            set => this.RaiseAndSetIfChanged(ref _location, value);
+            get => _model.Location;
+            set
+            {
+                if (_model.Location != value)
+                {
+                    _model.Location = value;
+                    this.RaisePropertyChanged();
+                }
+            }
         }
         
         public string Status
         {
-            get => _status;
+            get => _botItem.Status;
             set
             {
-                this.RaiseAndSetIfChanged(ref _status, value);
-                // When status changes, update the bot item status
-                if (_botItem != null)
+                if (_botItem.Status != value)
                 {
                     _botItem.Status = value;
-                    // Notify that StatusColor has changed
+                    this.RaisePropertyChanged();
                     this.RaisePropertyChanged(nameof(StatusColor));
+                    this.RaisePropertyChanged(nameof(RunButtonText));
+                    this.RaisePropertyChanged(nameof(RunButtonBackground));
+                    this.RaisePropertyChanged(nameof(RunButtonIcon));
                 }
             }
         }
@@ -82,16 +106,17 @@ namespace upeko.ViewModels
             set => this.RaiseAndSetIfChanged(ref _consoleOutput, value);
         }
         
-        public string LastUpdated
-        {
-            get => _lastUpdated;
-            set => this.RaiseAndSetIfChanged(ref _lastUpdated, value);
-        }
-        
         public bool AutoStart
         {
-            get => _autoStart;
-            set => this.RaiseAndSetIfChanged(ref _autoStart, value);
+            get => _model.AutoStart;
+            set
+            {
+                if (_model.AutoStart != value)
+                {
+                    _model.AutoStart = value;
+                    this.RaisePropertyChanged();
+                }
+            }
         }
         
         public string RunButtonText => Status == "Running" ? "Stop" : "Start";
@@ -115,22 +140,21 @@ namespace upeko.ViewModels
         {
             _parent = parent;
             _botItem = botItem;
+            _model = botItem.Model;
             
-            // Copy properties from the bot item
-            _name = botItem.Name;
-            _iconSource = botItem.IconSource;
-            _version = botItem.Version;
-            _location = botItem.Location;
-            _status = botItem.Status;
-            
-            // Initialize default values
-            _lastUpdated = DateTime.Now.AddDays(-3).ToString("yyyy-MM-dd HH:mm:ss");
+            // Initialize console output
             _consoleOutput = "Welcome to Bot Console\n\n" +
                              "> Bot initialized\n" +
-                             "> Version: " + _version + "\n" +
-                             "> Status: " + _status + "\n\n" +
+                             "> Version: " + _model.Version + "\n" +
+                             "> Status: " + _botItem.Status + "\n\n" +
                              "Type 'help' for available commands.\n";
-            _autoStart = false;
+            
+            // Subscribe to model property changes
+            _model.PropertyChanged += (sender, args) =>
+            {
+                // When the model changes, raise property changed for the corresponding property
+                this.RaisePropertyChanged(args.PropertyName);
+            };
             
             // Initialize commands
             BackCommand = ReactiveCommand.Create(ExecuteBack);
@@ -151,18 +175,12 @@ namespace upeko.ViewModels
                 // Stop the bot
                 Status = "Stopped";
                 ConsoleOutput += "\n> Bot stopped at " + DateTime.Now.ToString("HH:mm:ss") + "\n";
-                this.RaisePropertyChanged(nameof(RunButtonText));
-                this.RaisePropertyChanged(nameof(RunButtonBackground));
-                this.RaisePropertyChanged(nameof(RunButtonIcon));
             }
             else
             {
                 // Start the bot
                 Status = "Running";
                 ConsoleOutput += "\n> Bot started at " + DateTime.Now.ToString("HH:mm:ss") + "\n";
-                this.RaisePropertyChanged(nameof(RunButtonText));
-                this.RaisePropertyChanged(nameof(RunButtonBackground));
-                this.RaisePropertyChanged(nameof(RunButtonIcon));
             }
         }
         
@@ -176,12 +194,7 @@ namespace upeko.ViewModels
             // In a real application, you would use async/await here
             Status = "Stopped";
             Version = "1.0.1";
-            _botItem.Version = "1.0.1";
-            LastUpdated = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             ConsoleOutput += "> Update completed. New version: " + Version + "\n";
-            this.RaisePropertyChanged(nameof(RunButtonText));
-            this.RaisePropertyChanged(nameof(RunButtonBackground));
-            this.RaisePropertyChanged(nameof(RunButtonIcon));
         }
         
         private void ExecuteOpenFolder()
@@ -192,7 +205,7 @@ namespace upeko.ViewModels
                 Process.Start(new ProcessStartInfo
                 {
                     FileName = "explorer.exe",
-                    Arguments = _location,
+                    Arguments = _model.Location,
                     UseShellExecute = true
                 });
             }
