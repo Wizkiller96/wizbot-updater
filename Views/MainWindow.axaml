@@ -11,7 +11,7 @@
         x:Class="upeko.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         WindowStartupLocation="CenterScreen"
-        Icon="/Assets/avalonia-logo.ico"
+        Icon="/Assets/upeko.ico"
         Title="upeko">
 
     <Design.DataContext>

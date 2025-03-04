@@ -4,6 +4,8 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.DependencyInjection;
+using upeko.Services;
 using upeko.ViewModels;
 using upeko.Views;
 
@@ -11,9 +13,22 @@ namespace upeko;
 
 public partial class App : Application
 {
+    public static ServiceProvider Services { get; private set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        
+        // Configure services
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection);
+        Services = serviceCollection.BuildServiceProvider();
+    }
+
+    private void ConfigureServices(IServiceCollection services)
+    {
+        // Register the JsonBotRepository as a singleton
+        services.AddSingleton<IBotRepository, JsonBotRepository>();
     }
 
     public override void OnFrameworkInitializationCompleted()

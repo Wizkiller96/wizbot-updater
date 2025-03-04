@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Input;
 using Avalonia.Media;
-using Avalonia.Media.Imaging;
 using ReactiveUI;
 using upeko.Models;
 
@@ -13,9 +13,9 @@ namespace upeko.ViewModels
         private readonly BotListViewModel _parent;
         private readonly BotItemViewModel _botItem;
         private readonly BotModel _model;
-        
+
         private string _consoleOutput;
-        
+
         public string Name
         {
             get => _model.Name;
@@ -28,23 +28,23 @@ namespace upeko.ViewModels
                 }
             }
         }
-        
-        public Bitmap IconSource
+
+        public Uri IconUri
         {
-            get => _model.Icon;
+            get => _model.IconUri;
             set
             {
-                if (_model.Icon != value)
+                if (_model.IconUri != value)
                 {
-                    _model.Icon = value;
+                    _model.IconUri = value;
                     this.RaisePropertyChanged();
                 }
             }
         }
-        
+
         public string Version
         {
-            get => _model.Version;
+            get => _model.Version ?? "None";
             set
             {
                 if (_model.Version != value)
@@ -54,20 +54,21 @@ namespace upeko.ViewModels
                 }
             }
         }
-        
-        public string Location
+
+        public string? BotPath
         {
-            get => _model.Location;
+            get => _model.PathUri?.ToString();
             set
             {
-                if (_model.Location != value)
+                if (_model.PathUri?.ToString() != value
+                    && Uri.TryCreate(value, UriKind.Absolute, out var uri))
                 {
-                    _model.Location = value;
+                    _model.PathUri = uri;
                     this.RaisePropertyChanged();
                 }
             }
         }
-        
+
         public string Status
         {
             get => _botItem.Status;
@@ -84,7 +85,7 @@ namespace upeko.ViewModels
                 }
             }
         }
-        
+
         public IBrush StatusColor
         {
             get
@@ -93,19 +94,19 @@ namespace upeko.ViewModels
                 {
                     "Running" => new SolidColorBrush(Color.Parse("#107C10")), // Green
                     "Stopped" => new SolidColorBrush(Color.Parse("#797775")), // Gray
-                    "Error" => new SolidColorBrush(Color.Parse("#D83B01")),   // Red
+                    "Error" => new SolidColorBrush(Color.Parse("#D83B01")), // Red
                     "Updating..." => new SolidColorBrush(Color.Parse("#0078D7")), // Blue
-                    _ => new SolidColorBrush(Color.Parse("#797775"))          // Default gray
+                    _ => new SolidColorBrush(Color.Parse("#797775")) // Default gray
                 };
             }
         }
-        
+
         public string ConsoleOutput
         {
             get => _consoleOutput;
             set => this.RaiseAndSetIfChanged(ref _consoleOutput, value);
         }
-        
+
         public bool AutoStart
         {
             get => _model.AutoStart;
@@ -118,56 +119,90 @@ namespace upeko.ViewModels
                 }
             }
         }
+
+        public string RunButtonText
+            => Status == "Running" ? "Stop" : "Start";
+
+        public IBrush RunButtonBackground
+            => Status == "Running"
+                ? new SolidColorBrush(Color.Parse("#D83B01")) // Red for stop
+                : new SolidColorBrush(Color.Parse("#107C10")); // Green for start
+
+        public IBrush RunButtonForeground
+            => new SolidColorBrush(Colors.White);
         
-        public string RunButtonText => Status == "Running" ? "Stop" : "Start";
+
+        public string RunButtonIcon
+            => Status == "Running"
+                ? "M14,19H18V5H14M6,19H10V5H6V19Z" // Stop icon
+                : "M8,5.14V19.14L19,12.14L8,5.14Z"; // Play icon
         
-        public IBrush RunButtonBackground => Status == "Running" 
-            ? new SolidColorBrush(Color.Parse("#D83B01")) // Red for stop
-            : new SolidColorBrush(Color.Parse("#107C10")); // Green for start
         
-        public IBrush RunButtonForeground => new SolidColorBrush(Colors.White);
-        
-        public string RunButtonIcon => Status == "Running" 
-            ? "M14,19H18V5H14M6,19H10V5H6V19Z" // Stop icon
-            : "M8,5.14V19.14L19,12.14L8,5.14Z"; // Play icon
-        
+        private bool _deleteConfirm = false;
+        public bool DeleteConfirm
+        {
+            get => _deleteConfirm;
+            set => this.RaiseAndSetIfChanged(ref _deleteConfirm, value);
+        }
+
         public ICommand BackCommand { get; }
         public ICommand ToggleRunningCommand { get; }
         public ICommand UpdateCommand { get; }
         public ICommand OpenFolderCommand { get; }
-        
+        public ICommand DeleteIntentCommand { get; }
+        public ICommand DeleteBotCommand { get; }
+        public ICommand DeleteCancelCommand { get; }
+
         public BotViewModel(BotListViewModel parent, BotItemViewModel botItem)
         {
             _parent = parent;
             _botItem = botItem;
             _model = botItem.Model;
-            
+
             // Initialize console output
             _consoleOutput = "Welcome to Bot Console\n\n" +
                              "> Bot initialized\n" +
                              "> Version: " + _model.Version + "\n" +
                              "> Status: " + _botItem.Status + "\n\n" +
                              "Type 'help' for available commands.\n";
-            
+
             // Subscribe to model property changes
-            _model.PropertyChanged += (sender, args) =>
+            _model.PropertyChanged += (_, args) =>
             {
                 // When the model changes, raise property changed for the corresponding property
                 this.RaisePropertyChanged(args.PropertyName);
             };
-            
+
             // Initialize commands
             BackCommand = ReactiveCommand.Create(ExecuteBack);
             ToggleRunningCommand = ReactiveCommand.Create(ExecuteToggleRunning);
             UpdateCommand = ReactiveCommand.Create(ExecuteUpdate);
             OpenFolderCommand = ReactiveCommand.Create(ExecuteOpenFolder);
+            DeleteBotCommand = ReactiveCommand.Create(ExecuteDeleteBot);
+            DeleteIntentCommand = ReactiveCommand.Create(ExecuteDeleteIntent);
+            DeleteCancelCommand = ReactiveCommand.Create(ExecuteCancelDelete);
+        }
+        
+        private void ExecuteCancelDelete()
+        {
+            DeleteConfirm = false;
+        }
+        
+        private void ExecuteDeleteIntent()
+        {
+            DeleteConfirm = true;
+        }
+        
+        private void ExecuteDeleteBot()
+        {
+            _parent.RemoveBot(_botItem);
         }
         
         private void ExecuteBack()
         {
             _parent.NavigateBack();
         }
-        
+
         private void ExecuteToggleRunning()
         {
             if (Status == "Running")
@@ -183,20 +218,20 @@ namespace upeko.ViewModels
                 ConsoleOutput += "\n> Bot started at " + DateTime.Now.ToString("HH:mm:ss") + "\n";
             }
         }
-        
+
         private void ExecuteUpdate()
         {
             // Logic to update the bot
             Status = "Updating...";
             ConsoleOutput += "\n> Updating bot...\n";
-            
+
             // Simulate update process
             // In a real application, you would use async/await here
             Status = "Stopped";
             Version = "1.0.1";
             ConsoleOutput += "> Update completed. New version: " + Version + "\n";
         }
-        
+
         private void ExecuteOpenFolder()
         {
             try
@@ -204,8 +239,8 @@ namespace upeko.ViewModels
                 // Open the folder in explorer
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "explorer.exe",
-                    Arguments = _model.Location,
+                    FileName = PlatformSpecific.GetNameOfFileExplorer(),
+                    Arguments = Path.Join(_model.PathUri?.ToString(), "upeko"),
                     UseShellExecute = true
                 });
             }
@@ -214,5 +249,19 @@ namespace upeko.ViewModels
                 ConsoleOutput += "\n> Error opening folder: " + ex.Message + "\n";
             }
         }
+    }
+}
+
+public static class PlatformSpecific
+{
+    public static string GetNameOfFileExplorer()
+    {
+        return Environment.OSVersion.Platform switch
+        {
+            PlatformID.Win32NT => "explorer.exe",
+            PlatformID.Unix => "xdg-open",
+            PlatformID.MacOSX => "open",
+            _ => throw new PlatformNotSupportedException("Unsupported platform: " + Environment.OSVersion.Platform)
+        };
     }
 }

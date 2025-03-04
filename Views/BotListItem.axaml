@@ -3,48 +3,46 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:upeko.ViewModels"
+             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              mc:Ignorable="d"
              x:Class="upeko.Views.BotListItem"
              x:DataType="viewModels:BotItemViewModel">
-    <Button Command="{Binding OpenBotCommand}" 
-            HorizontalAlignment="Stretch" 
+    <Button Command="{Binding OpenBotCommand}"
+            HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Background="White"
             BorderThickness="1"
             CornerRadius="4"
             Padding="10"
             Margin="5">
         <Grid ColumnDefinitions="Auto,*,Auto">
-            <Border Grid.Column="0" 
-                    Background="#0078D7" 
-                    CornerRadius="6" 
-                    Width="48" 
-                    Height="48" 
+            <Border Grid.Column="0"
+                    Background="#0078D7"
+                    CornerRadius="32"
+                    Width="48"
+                    Height="48"
                     Margin="0,0,10,0"
                     ClipToBounds="True">
-                <Image Source="{Binding IconSource}" 
-                       Width="32" 
-                       Height="32"/>
+                <Image
+                    asyncImageLoader:ImageLoader.Source="{Binding Icon}"
+                    Width="48"
+                    Height="48" />
             </Border>
-            <StackPanel Grid.Column="1" 
+            <StackPanel Grid.Column="1"
                         VerticalAlignment="Center"
                         Spacing="4">
-                <TextBlock Text="{Binding Name}" 
+                <TextBlock Text="{Binding Name}"
                            FontSize="16"
-                           FontWeight="SemiBold"
-                           Foreground="#323130"/>
-                <TextBlock Text="{Binding Version}" 
-                           FontSize="12"
-                           Foreground="#605E5C"/>
+                           FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Version}"
+                           FontSize="12" />
             </StackPanel>
-            <Border Grid.Column="2" 
-                    Background="{Binding StatusColor}" 
-                    CornerRadius="4" 
+            <Border Grid.Column="2"
+                    Background="{Binding StatusColor}"
+                    CornerRadius="4"
                     Padding="8,4"
                     VerticalAlignment="Center">
-                <TextBlock Text="{Binding Status}" 
-                           FontSize="12"
-                           Foreground="White"/>
+                <TextBlock Text="{Binding Status}"
+                           FontSize="12" />
             </Border>
         </Grid>
     </Button>

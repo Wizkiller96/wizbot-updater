@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel;
+using System.IO;
+using System.Net;
 using System.Runtime.CompilerServices;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -9,41 +11,55 @@ namespace upeko.Models
     [INotifyPropertyChanged]
     public partial class BotModel
     {
-        private string Id { get; init; }
+        [ObservableProperty]
+        private Guid _guid;
 
         [ObservableProperty]
         private string _name;
 
         [ObservableProperty]
-        private Bitmap _icon;
+        private Uri? _iconUri;
 
         [ObservableProperty]
-        private string _version;
+        private string? _version;
 
         [ObservableProperty]
-        private string _location;
+        private Uri? _pathUri;
 
         [ObservableProperty]
         private bool _autoStart;
 
         public BotModel()
         {
-            Id = Guid.NewGuid().ToString();
+            _guid = Guid.NewGuid();
             _name = "New Bot";
-            _icon = null;
-            _version = "1.0.0";
-            _location = string.Empty;
+            _iconUri = null;
+            _version = null;
+            _pathUri = null;
             _autoStart = false;
         }
 
-        public BotModel(string name, string? location = null)
+        /// <summary>
+        /// Moves the bot and all files from the current location to a new location
+        /// Data in the new location will be overwritten
+        /// </summary>
+        /// <param name="location"></param>
+        public void Move(string location)
         {
-            Id = Guid.NewGuid().ToString();
-            _name = name;
-            _icon = null;
-            _version = "1.0.0";
-            _location = location ?? $"C:\\Bots\\{name.Replace(" ", "")}";
-            _autoStart = false;
+            if (!Uri.TryCreate(location, UriKind.Absolute, out var uri))
+                return;
+
+            if (Directory.Exists(location))
+            {
+                Directory.Delete(location, true);
+            }
+
+            if (PathUri is not null && Directory.Exists(PathUri.ToString()))
+            {
+                Directory.Move(PathUri.ToString(), location);
+            }
+
+            PathUri = uri;
         }
     }
 }
