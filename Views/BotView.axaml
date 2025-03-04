@@ -66,7 +66,7 @@
                                            FontWeight="SemiBold"
                                            Margin="0,0,0,12" />
 
-                                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,20">
+                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,20">
                                     <Border Grid.Row="0" Grid.Column="0"
                                             Padding="10,8"
                                             Margin="0,0,12,8"
@@ -100,14 +100,14 @@
                                                    TextWrapping="Wrap" />
                                     </Border>
 
-                                    <Border Grid.Row="2" Grid.Column="0"
+                                    <Border Grid.Row="1" Grid.Column="2"
                                             Padding="10,8"
                                             Margin="0,0,12,8"
                                             CornerRadius="4"
-                                            Width="120">
-                                        <TextBlock Text="Last Updated"
-                                                   FontWeight="SemiBold"
-                                                   HorizontalAlignment="Center" />
+                                            >
+                                        <Button>
+                                            +^
+                                        </Button>
                                     </Border>
                                 </Grid>
                             </StackPanel>
@@ -132,9 +132,17 @@
                                         <StackPanel x:Name="DeleteConfirmationPanel"
                                                     Orientation="Vertical"
                                                     IsVisible="{Binding DeleteConfirm}">
-                                            <TextBlock
-                                                Text="This will delete your bot and all of its data. This action is irreversible. Are you sure?" />
-                                            <StackPanel Orientation="Horizontal">
+                                            <Border
+                                                BorderThickness="1"
+                                                BorderBrush="Crimson"
+                                                Padding="4">
+                                                <TextBlock
+                                                    TextWrapping="Wrap"
+                                                    Text="This will delete your bot and all of its data. This action is irreversible. Are you sure?" />
+                                            </Border>
+                                            <StackPanel Orientation="Horizontal"
+                                                        HorizontalAlignment="Center"
+                                                        Margin="0,8,0,0">
                                                 <Button x:Name="ConfirmButton" Content="Confirm"
                                                         Command="{Binding DeleteBotCommand}" />
                                                 <Button x:Name="CancelButton" Content="Cancel"

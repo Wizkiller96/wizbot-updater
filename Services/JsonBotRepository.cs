@@ -15,8 +15,8 @@ namespace upeko.Services
             PropertyNameCaseInsensitive = true,
             WriteIndented = true
         };
-        
-        
+
+
         private readonly string _legacyBotsJsonPath;
 
         private readonly string _appDirectory;
@@ -103,6 +103,7 @@ namespace upeko.Services
         public void AddBot(BotModel bot)
         {
             _config.Bots.Add(bot);
+            bot.PathUri = new(Path.Join(_config.DefaultBotsFolder, bot.Guid.ToString().Substring(0, 5)));
             SaveConfig();
         }
 
