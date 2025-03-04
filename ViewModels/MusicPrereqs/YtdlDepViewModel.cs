@@ -32,31 +32,15 @@ namespace NadekoUpdater.Common
         {
             try
             {
-                // first check if ytdlp is even there.
-                using var p = Process.Start(new ProcessStartInfo
+                await Process.Start(new ProcessStartInfo()
                 {
                     FileName = "yt-dlp",
-                    Arguments = "--version",
+                    Arguments = "-U",
                     UseShellExecute = false,
                     CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                });
+                })!.WaitForExitAsync();
 
-                var currentVersion = (await p.StandardOutput.ReadToEndAsync()).Trim();
-                string latestVersion = null;
-
-                try
-                {
-                    latestVersion = await GetLatestReleaseVersionAsync();
-                }
-                catch
-                {
-                }
-
-                // if it is installed, gotta check if it's updated
-                return (latestVersion is null || currentVersion == latestVersion)
-                    ? DepState.Installed
-                    : DepState.UpdateNeeded;
+                return DepState.Installed;
             }
             catch
             {
@@ -67,8 +51,8 @@ namespace NadekoUpdater.Common
 
         protected override async Task<bool> InternalInstallAsync()
         {
-            var baseUrl =
-                $"https://github.com/yt-dlp/yt-dlp/releases/download/{await GetLatestReleaseVersionAsync()}/";
+            var baseUrl = $"https://github.com/yt-dlp/yt-dlp/releases/latest/download/";
+
             var winDlLink = baseUrl + "yt-dlp.exe";
             var linuxDlLink = baseUrl + "yt-dlp";
 
@@ -111,15 +95,6 @@ namespace NadekoUpdater.Common
             }
 
             return false;
-        }
-
-        private static async Task<string> GetLatestReleaseVersionAsync()
-        {
-            using var http = new HttpClient(_httpClientHandler);
-            var response = await http.GetAsync("https://github.com/yt-dlp/yt-dlp/releases/latest");
-            var lastSlashIndex = response.Headers.Location.OriginalString.LastIndexOf('/') + 1;
-
-            return response.Headers.Location.OriginalString[lastSlashIndex..];
         }
 
         #endregion
