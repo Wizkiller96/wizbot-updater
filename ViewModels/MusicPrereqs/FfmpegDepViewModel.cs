@@ -12,7 +12,7 @@ using SharpCompress.Compressors.Xz;
 using SharpCompress.Readers;
 using ZstdSharp;
 
-namespace NadekoUpdater.Common
+namespace upeko.ViewModels
 {
     /// <summary>
     /// Viewmodel for FFMPEG bot dependency
@@ -24,7 +24,7 @@ namespace NadekoUpdater.Common
         /// <summary>
         /// Default constructor
         /// </summary>
-        private FfmpegDepViewModel() : base("FFMPEG")
+        public FfmpegDepViewModel() : base("ffmpeg")
         {
         }
 

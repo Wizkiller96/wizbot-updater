@@ -3,7 +3,7 @@ using System.Collections;
 using System.Threading.Tasks;
 using upeko.ViewModels;
 
-namespace NadekoUpdater.Common
+namespace upeko.ViewModels
 {
     /// <summary>
     /// Base Viewmodel that all bot dependencies inherit from

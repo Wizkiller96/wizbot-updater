@@ -37,6 +37,9 @@ public class BotListViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _currentPage, value);
     }
 
+    public FfmpegDepViewModel FfmpegViewModel { get; } = new();
+    public YtdlDepViewModel YtdlpViewModel { get; } = new();
+
     public BotListViewModel()
     {
         // Get the bot repository from the service provider

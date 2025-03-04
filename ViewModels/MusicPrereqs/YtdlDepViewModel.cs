@@ -6,21 +6,19 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace NadekoUpdater.Common
+namespace upeko.ViewModels
 {
     /// <summary>
     /// Viewmodel for YoutubeDL bot dependency
     /// </summary>
     public class YtdlDepViewModel : DepViewModel
     {
-        private static readonly HttpClientHandler _httpClientHandler = new() { AllowAutoRedirect = false };
-
         #region Constructors
 
         /// <summary>
         /// Default constructor
         /// </summary>
-        private YtdlDepViewModel() : base("YouTube - DLP")
+        public YtdlDepViewModel() : base("yt-dlp")
         {
         }
 

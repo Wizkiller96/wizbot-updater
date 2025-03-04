@@ -8,18 +8,9 @@ namespace upeko.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
-    public ICommand AddBotCommand { get; }
-    public Interaction<AddBotViewModel, AddBotOutputViewModel?> ShowAddBotDialog { get; }
-    
     public BotListViewModel Bots { get; } = new();
 
     public MainWindowViewModel()
     {
-        ShowAddBotDialog = new();
-        AddBotCommand = ReactiveCommand.Create(async () =>
-        {
-            var result = await ShowAddBotDialog.Handle(new AddBotViewModel());
-            Debug.WriteLine(result);
-        });
     }
 }
