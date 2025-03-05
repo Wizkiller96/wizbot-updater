@@ -100,7 +100,7 @@ namespace upeko.ViewModels
 
                     var staticUrl = $"https://www.johnvansickle.com/ffmpeg/old-releases/" +
                                     $"ffmpeg-6.0.1-{arch}-static.tar.xz";
-                    var xzFile = "~/.local/sbin/";
+                    var binFolder = "~/.local/sbin/";
 
                     using var http = new HttpClient();
                     await using var stream = await http.GetStreamAsync(staticUrl);
@@ -110,7 +110,7 @@ namespace upeko.ViewModels
                     {
                         if (reader.Entry.Key is "ffmpeg" or "ffprobe")
                         {
-                            await using var fs = new FileStream(Path.Combine(xzFile, reader.Entry.Key),
+                            await using var fs = new FileStream(Path.Combine(binFolder, reader.Entry.Key),
                                 FileMode.Create);
 
                             if (++cnt == 2)

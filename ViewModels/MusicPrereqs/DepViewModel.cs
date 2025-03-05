@@ -1,6 +1,8 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.ComponentModel;
+using ReactiveUI;
 using upeko.ViewModels;
 
 namespace upeko.ViewModels
@@ -11,6 +13,7 @@ namespace upeko.ViewModels
     public abstract class DepViewModel : ViewModelBase
     {
         #region Properties
+
         /// <summary>
         /// Name of the dependency
         /// </summary>
@@ -19,7 +22,43 @@ namespace upeko.ViewModels
         /// <summary>
         /// State of the dependency
         /// </summary>
-        public DepState State { get; private set; }
+        private DepState _state;
+
+        public DepState State
+        {
+            get => _state;
+            set
+            {
+                var oldValue = _state;
+                var newValue = this.RaiseAndSetIfChanged(ref _state, value);
+                if (oldValue != newValue)
+                {
+                    // Notify that the derived properties have also changed
+                    this.RaisePropertyChanged(nameof(IsChecking));
+                    this.RaisePropertyChanged(nameof(IsNotInstalled));
+                    this.RaisePropertyChanged(nameof(IsInstalled));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the dependency is currently being checked
+        /// </summary>
+        public bool IsChecking
+            => State == DepState.Checking;
+
+        /// <summary>
+        /// Gets whether the dependency is not installed
+        /// </summary>
+        public bool IsNotInstalled
+            => State == DepState.NotInstalled;
+
+        /// <summary>
+        /// Gets whether the dependency is installed
+        /// </summary>
+        public bool IsInstalled
+            => State == DepState.Installed;
+
         #endregion
 
         /// <summary>
@@ -40,7 +79,7 @@ namespace upeko.ViewModels
         /// </summary>
         public async Task InstallAsync()
         {
-            if (State == DepState.NotInstalled || State == DepState.UpdateNeeded)
+            if (State == DepState.NotInstalled)
             {
                 State = DepState.Checking;
 
@@ -53,7 +92,8 @@ namespace upeko.ViewModels
                 return;
             }
 
-            throw new InvalidOperationException("You can only install the dependency if it is in NotInstalled or UpdateNeeded state.");
+            throw new InvalidOperationException(
+                "You can only install the dependency if it is in NotInstalled or UpdateNeeded state.");
         }
 
         /// <summary>
@@ -62,10 +102,19 @@ namespace upeko.ViewModels
         public async Task CheckAsync()
         {
             State = DepState.Checking;
-            foreach (DictionaryEntry var in Environment.GetEnvironmentVariables(EnvironmentVariableTarget.User))
+            try
             {
-                if (!(var.Key is null) && !(var.Value is null))
-                    Environment.SetEnvironmentVariable(var.Key.ToString(), var.Value.ToString(), EnvironmentVariableTarget.Process);
+                // foreach (DictionaryEntry var in Environment.GetEnvironmentVariables(EnvironmentVariableTarget.User))
+                // {
+                //     if (!(var.Key is null) && !(var.Value is null))
+                //         Environment.SetEnvironmentVariable(var.Key.ToString(),
+                //             var.Value.ToString(),
+                //             EnvironmentVariableTarget.Process);
+                // }
+            }
+            catch
+            {
+                // todo: Error message box
             }
 
             var newState = await InternalCheckAsync();
@@ -93,5 +142,4 @@ public enum DepState
     Checking,
     NotInstalled,
     Installed,
-    UpdateNeeded,
 }

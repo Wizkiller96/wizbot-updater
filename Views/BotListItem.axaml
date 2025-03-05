@@ -11,39 +11,83 @@
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             BorderThickness="1"
-            CornerRadius="4"
-            Padding="10"
-            Margin="5">
-        <Grid ColumnDefinitions="Auto,*,Auto">
-            <Border Grid.Column="0"
-                    Background="#0078D7"
-                    CornerRadius="32"
-                    Width="48"
-                    Height="48"
-                    Margin="0,0,10,0"
-                    ClipToBounds="True">
-                <Image
-                    asyncImageLoader:ImageLoader.Source="{Binding Icon}"
-                    Width="48"
-                    Height="48" />
-            </Border>
-            <StackPanel Grid.Column="1"
-                        VerticalAlignment="Center"
-                        Spacing="4">
-                <TextBlock Text="{Binding Name}"
-                           FontSize="16"
-                           FontWeight="SemiBold" />
-                <TextBlock Text="{Binding Version}"
-                           FontSize="12" />
+            Padding="4"
+            Margin="6">
+        <Grid>
+            <!-- Version (Top Left) -->
+            <StackPanel Orientation="Vertical"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        Margin="2">
+                <StackPanel>
+                    <TextBlock Text="v"
+                               FontSize="13"
+                               Opacity="0.7" />
+                    <TextBlock Text="{Binding Version}"
+                               FontSize="13"
+                               Opacity="0.7" />
+                </StackPanel>
+
+                <!-- Update Available Indicator -->
+                <Border IsVisible="{Binding UpdateAvailable}"
+                        Background="{DynamicResource SystemAccentColor}"
+                        CornerRadius="4"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Top">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Update!"
+                                   FontSize="10"
+                                   Padding="2"
+                                   FontWeight="Medium" />
+                    </StackPanel>
+                </Border>
             </StackPanel>
-            <Border Grid.Column="2"
+
+            <!-- Status Badge (Top Right) -->
+            <Border HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
                     Background="{Binding StatusColor}"
-                    CornerRadius="4"
-                    Padding="8,4"
-                    VerticalAlignment="Center">
+                    CornerRadius="6"
+                    Padding="4"
+                    Margin="0">
                 <TextBlock Text="{Binding Status}"
-                           FontSize="12" />
+                           FontSize="12"
+                           FontWeight="Medium"
+                           Foreground="White">
+                </TextBlock>
             </Border>
+
+
+            <!-- Bot Avatar (Center) -->
+            <StackPanel VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                <Border CornerRadius="32"
+                        Width="64" Height="64"
+                        Margin="0,0,0,12"
+                        ClipToBounds="True">
+                    <Panel>
+                        <!-- Gradient Background for Avatar -->
+                        <Border>
+                            <Border.Background>
+                                <LinearGradientBrush StartPoint="0%,0%" EndPoint="100%,100%">
+                                    <GradientStop Offset="0" Color="#0078D7" />
+                                    <GradientStop Offset="1" Color="#00BCF2" />
+                                </LinearGradientBrush>
+                            </Border.Background>
+                        </Border>
+                        <!-- Avatar Image -->
+                        <Image asyncImageLoader:ImageLoader.Source="{Binding Icon}"
+                               Width="64" Height="64"
+                               Stretch="UniformToFill" />
+                    </Panel>
+                </Border>
+
+                <!-- Bot Name (Under Avatar) -->
+                <TextBlock Text="{Binding Name}"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
         </Grid>
     </Button>
 </UserControl>

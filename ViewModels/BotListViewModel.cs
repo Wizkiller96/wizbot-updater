@@ -5,6 +5,7 @@ using Avalonia.Media;
 using ReactiveUI;
 using upeko.Models;
 using upeko.Services;
+using System.IO;
 
 namespace upeko.ViewModels;
 
@@ -37,8 +38,6 @@ public class BotListViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _currentPage, value);
     }
 
-    public FfmpegDepViewModel FfmpegViewModel { get; } = new();
-    public YtdlDepViewModel YtdlpViewModel { get; } = new();
 
     public BotListViewModel()
     {
@@ -74,7 +73,7 @@ public class BotListViewModel : ViewModelBase
             _allItems.Add(botItemViewModel);
         }
 
-        // Add the button as the last ite
+        // Add the button as the last item
         _allItems.Add(new AddButtonViewModel(this));
     }
 
@@ -82,10 +81,17 @@ public class BotListViewModel : ViewModelBase
     {
         var botName = $"Bot {Guid.NewGuid().ToString().Substring(0, 5)}";
 
+        // Create a default path in the user's documents folder
+        string defaultPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), 
+            "upeko", 
+            botName);
+
         // Create a new bot model
         var botModel = new BotModel()
         {
-            Name = botName
+            Name = botName,
+            PathUri = new Uri(defaultPath)
         };
 
         // Add the bot to the repository
@@ -137,6 +143,7 @@ public class BotItemViewModel : ViewModelBase
     private readonly BotModel _model;
     private BotListViewModel _parent;
     private string _status = "Stopped";
+    private bool _updateAvailable = false;
 
     public BotModel Model
         => _model;
@@ -219,11 +226,24 @@ public class BotItemViewModel : ViewModelBase
             return Status switch
             {
                 "Running" => new SolidColorBrush(Color.Parse("#107C10")), // Green
-                "Stopped" => new SolidColorBrush(Color.Parse("#797775")), // Gray
+                "Stopped" => new SolidColorBrush(Color.Parse("#FFB900")), // Yellow
                 "Error" => new SolidColorBrush(Color.Parse("#D83B01")), // Red
                 "Updating..." => new SolidColorBrush(Color.Parse("#0078D7")), // Blue
                 _ => new SolidColorBrush(Color.Parse("#797775")) // Default gray
             };
+        }
+    }
+
+    public bool UpdateAvailable
+    {
+        get => _updateAvailable;
+        set
+        {
+            if (_updateAvailable != value)
+            {
+                _updateAvailable = value;
+                this.RaisePropertyChanged();
+            }
         }
     }
 
@@ -240,6 +260,16 @@ public class BotItemViewModel : ViewModelBase
         {
             // When the model changes, raise property changed for the corresponding property
             this.RaisePropertyChanged(args.PropertyName);
+        };
+
+        // Check for updates using the UpdateChecker service
+        UpdateAvailable = Services.UpdateChecker.Instance.IsUpdateAvailable(_model.Version);
+        
+        // Subscribe to update notifications
+        Services.UpdateChecker.Instance.OnNewVersionFound += (release) =>
+        {
+            // Update the UI to show that a new version is available
+            UpdateAvailable = Services.UpdateChecker.Instance.IsUpdateAvailable(_model.Version);
         };
     }
 

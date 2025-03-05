@@ -3,6 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
 using upeko.Services;
@@ -14,6 +15,7 @@ namespace upeko;
 public partial class App : Application
 {
     public static ServiceProvider Services { get; private set; }
+    public static Window MainWindow { get; private set; }
 
     public override void Initialize()
     {
@@ -29,6 +31,9 @@ public partial class App : Application
     {
         // Register the JsonBotRepository as a singleton
         services.AddSingleton<IBotRepository, JsonBotRepository>();
+        
+        // Register the DialogService as a singleton
+        services.AddSingleton<IDialogService, DialogService>();
     }
 
     public override void OnFrameworkInitializationCompleted()
@@ -38,10 +43,11 @@ public partial class App : Application
             // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
             // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
             DisableAvaloniaDataAnnotationValidation();
-            desktop.MainWindow = new MainWindow
+            MainWindow = new MainWindow
             {
                 DataContext = new MainWindowViewModel(),
             };
+            desktop.MainWindow = MainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();

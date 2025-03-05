@@ -4,15 +4,15 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:common="clr-namespace:upeko.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:DataType="common:FfmpegDepViewModel"
-             x:Class="upeko.Views.FfmpegButtonView">
+             x:DataType="common:YtdlDepViewModel"
+             x:Class="upeko.Views.YtDlpButtonView">
     <Border 
         CornerRadius="4"
         Background="#24292e"
         Padding="4">
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock 
-                Text="ffmpeg"
+                Text="yt-dlp"
                 Foreground="White"
                 FontWeight="Bold"
                 Margin="1"
@@ -41,7 +41,6 @@
                     Text="👎 Missing" 
                     Foreground="White" 
                     FontWeight="Bold"
-                    
                     Padding="4,0" />
             </Border>
             

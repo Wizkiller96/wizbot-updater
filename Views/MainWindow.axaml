@@ -19,6 +19,14 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel />
     </Design.DataContext>
-    
-    <views:BotListView DataContext="{Binding Bots}" />
+
+    <StackPanel>
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Center"
+                    Spacing="5">
+            <views:FfmpegButtonView DataContext="{Binding FfmpegViewModel}" />
+            <views:YtDlpButtonView DataContext="{Binding YtDlpViewModel}" />
+        </StackPanel>
+        <views:BotListView DataContext="{Binding Bots}" />
+    </StackPanel>
 </Window>

@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:upeko.ViewModels"
+             xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              mc:Ignorable="d"
              x:Class="upeko.Views.BotView"
              x:DataType="viewModels:BotViewModel">
@@ -19,7 +20,7 @@
                         Height="64"
                         Margin="0,0,20,0"
                         ClipToBounds="True">
-                    <Image Source="{Binding IconUri}"
+                    <Image asyncImageLoader:ImageLoader.Source="{Binding Icon}"
                            Width="64"
                            Height="64" />
                 </Border>
@@ -101,12 +102,13 @@
                                     </Border>
 
                                     <Border Grid.Row="1" Grid.Column="2"
-                                            Padding="10,8"
-                                            Margin="0,0,12,8"
-                                            CornerRadius="4"
-                                            >
-                                        <Button>
-                                            +^
+                                            Padding="4,4"
+                                            Margin="8,0,0,8"
+                                            CornerRadius="4">
+                                        <Button Command="{Binding SelectBotPathCommand}"
+                                                ToolTip.Tip="Select Bot Location">
+                                            <PathIcon Data="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"
+                                                     Width="16" Height="16" />
                                         </Button>
                                     </Border>
                                 </Grid>
@@ -173,36 +175,81 @@
                 BorderThickness="0,1,0,0"
                 Padding="20">
             <Grid ColumnDefinitions="*,Auto">
+                <!-- Download Progress Overlay -->
+                <Border Grid.ColumnSpan="2"
+                        Padding="20"
+                        IsVisible="{Binding IsDownloading}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="{Binding DownloadStatus}"
+                                   HorizontalAlignment="Center"
+                                   FontSize="14"
+                                   FontWeight="SemiBold" />
+                        <ProgressBar Value="{Binding DownloadProgress}"
+                                     Minimum="0"
+                                     Maximum="1"
+                                     Height="8"
+                                     CornerRadius="4" />
+                        <TextBlock Text="Please wait while the bot is being downloaded and installed..."
+                                   HorizontalAlignment="Center"
+                                   FontSize="12"
+                                   Opacity="0.7" />
+                    </StackPanel>
+                </Border>
+                
+                <!-- Normal Buttons (hidden during download) -->
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal"
                             HorizontalAlignment="Left"
-                            Spacing="12">
-                    <Button Command="{Binding ToggleRunningCommand}"
-                            Background="{Binding RunButtonBackground}"
-                            BorderThickness="0"
-                            Padding="15,10"
-                            CornerRadius="4"
-                            Width="120">
+                            Spacing="12"
+                            IsVisible="{Binding IsNotDownloading}">
+                    <StackPanel Orientation="Vertical" Spacing="8">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <PathIcon Data="{Binding RunButtonIcon}" Width="16" Height="16" />
-                            <TextBlock Text="{Binding RunButtonText}" />
+                            <Button Command="{Binding OpenDataFolderCommand}"
+                                    BorderThickness="1"
+                                    Padding="8,8"
+                                    CornerRadius="4"
+                                    ToolTip.Tip="Open Bot Folder">
+                                <PathIcon Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"
+                                         Width="16" Height="16" />
+                            </Button>
+                            <Button Command="{Binding OpenCredsFileCommand}"
+                                    BorderThickness="1"
+                                    Padding="8,8"
+                                    CornerRadius="4"
+                                    ToolTip.Tip="Open creds.yml">
+                                <PathIcon Data="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"
+                                         Width="16" Height="16" />
+                            </Button>
                         </StackPanel>
-                    </Button>
+                        <Button Command="{Binding ToggleRunningCommand}"
+                                Background="{Binding RunButtonBackground}"
+                                BorderThickness="0"
+                                Padding="15,10"
+                                CornerRadius="4"
+                                Width="120">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="{Binding RunButtonIcon}" Width="16" Height="16" />
+                                <TextBlock Text="{Binding RunButtonText}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </StackPanel>
 
                 <StackPanel Grid.Column="1"
-                            Orientation="Horizontal"
+                            Orientation="Vertical"
                             HorizontalAlignment="Right"
-                            Spacing="12">
-                    <Button Command="{Binding OpenFolderCommand}"
+                            Spacing="8"
+                            IsVisible="{Binding IsNotDownloading}">
+                    <Button Command="{Binding CheckForUpdatesCommand}"
                             BorderThickness="1"
-                            Padding="15,10"
-                            CornerRadius="4">
+                            Padding="8,6"
+                            CornerRadius="4"
+                            HorizontalAlignment="Right">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <PathIcon
-                                Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"
+                                Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z"
                                 Width="16" Height="16" />
-                            <TextBlock Text="Open Folder" />
+                            <TextBlock Text="Check for Updates" FontSize="12" />
                         </StackPanel>
                     </Button>
                     <Button Command="{Binding UpdateCommand}"
@@ -213,7 +260,7 @@
                             <PathIcon
                                 Data="M21,10.12H14.22L16.96,7.3C14.23,4.6 9.81,4.5 7.08,7.2C4.35,9.91 4.35,14.28 7.08,17C9.81,19.7 14.23,19.7 16.96,17C18.32,15.65 19,14.08 19,12.1H21C21,14.08 20.12,16.65 18.36,18.39C14.85,21.87 9.15,21.87 5.64,18.39C2.14,14.92 2.11,9.28 5.62,5.81C9.13,2.34 14.76,2.34 18.27,5.81L21,3V10.12M12.5,8V12.25L16,14.33L15.28,15.54L11,13V8H12.5Z"
                                 Width="16" Height="16" />
-                            <TextBlock Text="Update" />
+                            <TextBlock Text="{Binding UpdateButtonText}" />
                         </StackPanel>
                     </Button>
                 </StackPanel>

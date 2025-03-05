@@ -14,8 +14,9 @@
                 <Grid RowDefinitions="Auto,*">
                     <StackPanel
                         Grid.Row="0"
+                        Spacing="32"
+                        HorizontalAlignment="Center"
                         Orientation="Horizontal">
-                        <views:FfmpegButtonView DataContext="{Binding FfmpegViewModel}" />
                     </StackPanel>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
                         <ItemsControl ItemsSource="{Binding AllItems}">
@@ -35,7 +36,7 @@
                                                 <Button
                                                     HorizontalAlignment="Center"
                                                     VerticalAlignment="Center"
-                                                    Margin="5"
+                                                    Margin="5, 0, 5, 0"
                                                     Padding="10"
                                                     BorderThickness="1"
                                                     Command="{Binding AddCommand}">
