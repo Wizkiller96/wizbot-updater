@@ -59,18 +59,14 @@
         <TabControl Grid.Row="1" Margin="0" Padding="0">
             <TabItem Header="Information">
                 <ScrollViewer>
-                    <Border Padding="20">
+                    <Border Padding="2, 5, 2, 5">
                         <StackPanel Spacing="20">
                             <StackPanel>
-                                <TextBlock Text="Bot Information"
-                                           FontSize="18"
-                                           FontWeight="SemiBold"
-                                           Margin="0,0,0,12" />
-
-                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" Margin="0,0,0,20">
+                                <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto"
+                                      Margin="0,0,0,20">
                                     <Border Grid.Row="0" Grid.Column="0"
-                                            Padding="10,8"
-                                            Margin="0,0,12,8"
+                                            Padding="2,4"
+                                            Margin="0,0,6,4"
                                             CornerRadius="4"
                                             Width="120">
                                         <TextBlock Text="Version"
@@ -79,14 +75,14 @@
                                     </Border>
                                     <Border Grid.Row="0" Grid.Column="1"
                                             Padding="12,8"
-                                            Margin="0,0,0,8"
+                                            Margin="0,0,0,4"
                                             CornerRadius="4">
                                         <TextBlock Text="{Binding Version}" />
                                     </Border>
 
                                     <Border Grid.Row="1" Grid.Column="0"
                                             Padding="10,8"
-                                            Margin="0,0,12,8"
+                                            Margin="0,0,6,4"
                                             CornerRadius="4"
                                             Width="120">
                                         <TextBlock Text="Location"
@@ -95,20 +91,24 @@
                                     </Border>
                                     <Border Grid.Row="1" Grid.Column="1"
                                             Padding="12,8"
-                                            Margin="0,0,0,8"
+                                            Margin="0,0,0,4"
+                                            BorderThickness="1"
+                                            BorderBrush="DimGray"
                                             CornerRadius="4">
                                         <TextBlock Text="{Binding BotPath}"
+                                                   FontSize="10"
                                                    TextWrapping="Wrap" />
                                     </Border>
 
                                     <Border Grid.Row="1" Grid.Column="2"
                                             Padding="4,4"
-                                            Margin="8,0,0,8"
+                                            Margin="8,0,0,4"
                                             CornerRadius="4">
                                         <Button Command="{Binding SelectBotPathCommand}"
                                                 ToolTip.Tip="Select Bot Location">
-                                            <PathIcon Data="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"
-                                                     Width="16" Height="16" />
+                                            <PathIcon
+                                                Data="M19,20H4C2.89,20 2,19.1 2,18V6C2,4.89 2.89,4 4,4H10L12,6H19A2,2 0 0,1 21,8H21L4,8V18L6.14,10H23.21L20.93,18.5C20.7,19.37 19.92,20 19,20Z"
+                                                Width="16" Height="16" />
                                         </Button>
                                     </Border>
                                 </Grid>
@@ -126,8 +126,6 @@
                                     BorderBrush="#E1E1E1"
                                     BorderThickness="1">
                                     <StackPanel Spacing="8">
-                                        <CheckBox Content="Start bot on application launch"
-                                                  IsChecked="{Binding AutoStart}" />
                                         <Button x:Name="DeleteBotButton" Content="Delete Bot"
                                                 IsVisible="{Binding !DeleteConfirm}"
                                                 Command="{Binding DeleteIntentCommand}" />
@@ -173,7 +171,7 @@
         <!-- Footer -->
         <Border Grid.Row="2"
                 BorderThickness="0,1,0,0"
-                Padding="20">
+                Padding="20, 5, 20, 2">
             <Grid ColumnDefinitions="*,Auto">
                 <!-- Download Progress Overlay -->
                 <Border Grid.ColumnSpan="2"
@@ -195,7 +193,7 @@
                                    Opacity="0.7" />
                     </StackPanel>
                 </Border>
-                
+
                 <!-- Normal Buttons (hidden during download) -->
                 <StackPanel Grid.Column="0"
                             Orientation="Horizontal"
@@ -208,17 +206,19 @@
                                     BorderThickness="1"
                                     Padding="8,8"
                                     CornerRadius="4"
-                                    ToolTip.Tip="Open Bot Folder">
-                                <PathIcon Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"
-                                         Width="16" Height="16" />
+                                    ToolTip.Tip="Open data Folder">
+                                <PathIcon
+                                    Data="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"
+                                    Width="16" Height="16" />
                             </Button>
                             <Button Command="{Binding OpenCredsFileCommand}"
                                     BorderThickness="1"
                                     Padding="8,8"
                                     CornerRadius="4"
                                     ToolTip.Tip="Open creds.yml">
-                                <PathIcon Data="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"
-                                         Width="16" Height="16" />
+                                <PathIcon
+                                    Data="M14,17H7V15H14M17,13H7V11H17M17,9H7V7H17M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"
+                                    Width="16" Height="16" />
                             </Button>
                         </StackPanel>
                         <Button Command="{Binding ToggleRunningCommand}"
@@ -241,8 +241,9 @@
                             Spacing="8"
                             IsVisible="{Binding IsNotDownloading}">
                     <Button Command="{Binding CheckForUpdatesCommand}"
+                            IsEnabled="{Binding CanCheckForUpdates}"
                             BorderThickness="1"
-                            Padding="8,6"
+                            Padding="8, 6"
                             CornerRadius="4"
                             HorizontalAlignment="Right">
                         <StackPanel Orientation="Horizontal" Spacing="8">
@@ -253,8 +254,9 @@
                         </StackPanel>
                     </Button>
                     <Button Command="{Binding UpdateCommand}"
+                            IsEnabled="{Binding IsUpdateAvailable}"
                             BorderThickness="1"
-                            Padding="15,10"
+                            Padding="8, 6"
                             CornerRadius="4">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <PathIcon

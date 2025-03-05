@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Text.Json;
 using upeko.Models;
 
@@ -102,8 +103,13 @@ namespace upeko.Services
 
         public void AddBot(BotModel bot)
         {
+            if (bot.PathUri is null)
+                return;
+
+            if (!Directory.Exists(bot.PathUri!.LocalPath))
+                Directory.CreateDirectory(bot.PathUri!.LocalPath);
+
             _config.Bots.Add(bot);
-            bot.PathUri = new(Path.Join(_config.DefaultBotsFolder, bot.Guid.ToString().Substring(0, 5)));
             SaveConfig();
         }
 

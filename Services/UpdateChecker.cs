@@ -1,12 +1,9 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
 
 namespace upeko.Services
@@ -35,6 +32,7 @@ namespace upeko.Services
                         _instance ??= new UpdateChecker();
                     }
                 }
+
                 return _instance;
             }
         }
@@ -54,7 +52,8 @@ namespace upeko.Services
         /// <summary>
         /// The latest available version of the bot.
         /// </summary>
-        public string LatestVersion => LatestRelease?.TagName?.TrimStart('v') ?? "1.0.0";
+        public string LatestVersion
+            => LatestRelease?.TagName?.TrimStart('v') ?? "1.0.0";
 
         /// <summary>
         /// Event triggered during download progress.
@@ -108,12 +107,12 @@ namespace upeko.Services
         private int CompareVersions(string version1, string version2)
         {
             // Parse the version strings into Version objects
-            if (Version.TryParse(version1, out Version? v1) && Version.TryParse(version2, out Version? v2))
+            if (Version.TryParse(version1, out var v1) && Version.TryParse(version2, out var v2))
             {
                 // Use the built-in comparison
                 return v1.CompareTo(v2);
             }
-            
+
             // If parsing fails, fall back to string comparison
             return string.Compare(version1, version2, StringComparison.Ordinal);
         }
@@ -152,6 +151,9 @@ namespace upeko.Services
         /// <returns>A task representing the asynchronous operation.</returns>
         public async Task<string?> DownloadAndInstallBotAsync(string botName, string botPath)
         {
+            if (string.IsNullOrWhiteSpace(botPath))
+                throw new ArgumentNullException(nameof(botPath));
+
             try
             {
                 // Make sure we have the latest release information
@@ -170,59 +172,75 @@ namespace upeko.Services
                 }
 
                 // Determine the OS and architecture
-                string os = GetOS();
-                string arch = GetArchitecture();
-                string extension = os == "win" ? ".zip" : ".tar.gz";
-                
+                var os = PlatformSpecific.GetOS();
+                var arch = PlatformSpecific.GetArchitecture();
+                var extension = os == "win" ? ".zip" : ".tar.gz";
+
                 // Find the appropriate asset
-                string assetName = $"nadeko-{os}-{arch}{extension}";
-                var asset = Array.Find(LatestRelease.Assets, a => a.Name?.Equals(assetName, StringComparison.OrdinalIgnoreCase) == true);
-                
+                var assetName = $"nadeko-{os}-{arch}{extension}";
+                var asset = Array.Find(LatestRelease.Assets,
+                    a => a.Name?.Equals(assetName, StringComparison.OrdinalIgnoreCase) == true);
+
                 if (asset == null || string.IsNullOrEmpty(asset.DownloadUrl))
                 {
                     return $"Could not find download for {assetName}.";
                 }
 
                 // Create a temporary directory for the download
-                string tempDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+                // this is done this way to avoid issues on windows
+                // as Directory.Move doesn't work across drives, probably
+
+                if (Path.GetFullPath(Path.Combine(botPath, "..")) == Path.GetFullPath(botPath))
+                    throw new InvalidOperationException(
+                        "What are you doing? Do not install the bot in the root folder. Change directory first." +
+                        "If you delete the bot your system will be nuked.");
+
+                var tempDir = Path.Combine(botPath, "..", ".dl-" + Guid.NewGuid());
                 Directory.CreateDirectory(tempDir);
-                
+
                 // Download the file
-                string downloadPath = Path.Combine(tempDir, assetName);
+                var downloadPath = Path.Combine(tempDir, assetName);
                 OnDownloadProgress?.Invoke(0, $"Downloading {LatestRelease.TagName}...");
-                
-                using (var response = await _httpClient.GetAsync(asset.DownloadUrl, HttpCompletionOption.ResponseHeadersRead))
+
+                using (var response =
+                       await _httpClient.GetAsync(asset.DownloadUrl, HttpCompletionOption.ResponseHeadersRead))
                 {
                     response.EnsureSuccessStatusCode();
-                    
-                    long? totalBytes = response.Content.Headers.ContentLength;
-                    using (var contentStream = await response.Content.ReadAsStreamAsync())
-                    using (var fileStream = new FileStream(downloadPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+
+                    var totalBytes = response.Content.Headers.ContentLength;
+                    await using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    await using (var fileStream = new FileStream(downloadPath,
+                                     FileMode.Create,
+                                     FileAccess.Write,
+                                     FileShare.None,
+                                     8192,
+                                     true))
                     {
                         var buffer = new byte[8192];
                         long totalBytesRead = 0;
                         int bytesRead;
-                        
+
                         while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                         {
                             await fileStream.WriteAsync(buffer, 0, bytesRead);
                             totalBytesRead += bytesRead;
-                            
+
                             if (totalBytes.HasValue)
                             {
-                                double progress = (double)totalBytesRead / totalBytes.Value;
-                                OnDownloadProgress?.Invoke(progress, $"Downloading {LatestRelease.TagName}... {Math.Round(progress * 100)}%");
+                                var progress = (double)totalBytesRead / totalBytes.Value;
+                                OnDownloadProgress?.Invoke(progress,
+                                    $"Downloading {LatestRelease.TagName}... {Math.Round(progress * 100)}%");
                             }
                         }
                     }
                 }
-                
+
                 OnDownloadProgress?.Invoke(1, "Download complete. Extracting...");
-                
+
                 // Extract the downloaded file
-                string extractPath = Path.Combine(tempDir, "extract");
+                var extractPath = Path.Combine(tempDir, "extract");
                 Directory.CreateDirectory(extractPath);
-                
+
                 if (extension == ".zip")
                 {
                     ZipFile.ExtractToDirectory(downloadPath, extractPath);
@@ -230,62 +248,59 @@ namespace upeko.Services
                 else
                 {
                     // For tar.gz, we need to use a process since .NET doesn't have built-in tar.gz extraction
-                    using (var process = new Process())
+                    using var process = new Process();
+                    process.StartInfo = new ProcessStartInfo
                     {
-                        process.StartInfo = new ProcessStartInfo
-                        {
-                            FileName = "tar",
-                            Arguments = $"-xzf \"{downloadPath}\" -C \"{extractPath}\"",
-                            UseShellExecute = false,
-                            CreateNoWindow = true,
-                            RedirectStandardError = true
-                        };
-                        
-                        process.Start();
-                        string error = process.StandardError.ReadToEnd();
-                        process.WaitForExit();
-                        
-                        if (process.ExitCode != 0)
-                        {
-                            return $"Error extracting tar.gz: {error}";
-                        }
+                        FileName = "tar",
+                        Arguments = $"-xzf \"{downloadPath}\" -C \"{extractPath}\"",
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                        RedirectStandardError = true
+                    };
+
+                    process.Start();
+                    var error = await process.StandardError.ReadToEndAsync();
+                    await process.WaitForExitAsync();
+
+                    if (process.ExitCode != 0)
+                    {
+                        return $"Error extracting tar.gz: {error}";
                     }
                 }
-                
+
                 OnDownloadProgress?.Invoke(1, "Extraction complete. Installing...");
-                
-                // Ensure the bot directory exists
-                if (!Directory.Exists(botPath))
+
+
+                var backupPath = Path.GetFullPath(Path.Combine(botPath, "..", $".old-{botName}"));
+
+                // remove old backup
+                if (Directory.Exists(backupPath))
+                {
+                    Directory.Delete(backupPath, true);
+                }
+
+                // update - backup
+                if (Directory.Exists(botPath))
+                {
+                    Directory.Move(botPath, backupPath);
+                }
+                else
                 {
                     Directory.CreateDirectory(botPath);
                 }
-                
-                // Move the old installation to .old (if it exists)
-                string oldPath = Path.Combine(botPath, $"{botName}.old");
-                if (Directory.Exists(oldPath))
-                {
-                    Directory.Delete(oldPath, true);
-                }
-                
-                // If there's an existing installation, move it to .old
-                string installPath = Path.Combine(botPath, botName);
-                if (Directory.Exists(installPath))
-                {
-                    Directory.Move(installPath, oldPath);
-                }
-                
+
                 // Move the extracted files to the installation directory
-                Directory.Move(extractPath, installPath);
-                
+                Directory.Move(Path.Combine(extractPath, $"nadeko-{os}-{arch}"), botPath);
+
                 // If there's a data directory in the old installation, copy it to the new one
-                string oldDataPath = Path.Combine(oldPath, "data");
-                string newDataPath = Path.Combine(installPath, "data");
-                
+                var oldDataPath = Path.Combine(backupPath, "data");
+                var newDataPath = Path.Combine(botPath, "data");
+
                 if (Directory.Exists(oldDataPath))
                 {
                     CopyDirectory(oldDataPath, newDataPath);
                 }
-                
+
                 // Clean up the temporary directory
                 try
                 {
@@ -295,7 +310,7 @@ namespace upeko.Services
                 {
                     // Ignore errors during cleanup
                 }
-                
+
                 OnDownloadComplete?.Invoke(true, LatestVersion);
                 return null; // Success
             }
@@ -305,35 +320,8 @@ namespace upeko.Services
                 return ex.ToString();
             }
         }
-        
-        /// <summary>
-        /// Gets the OS identifier for the download URL.
-        /// </summary>
-        private string GetOS()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                return "win";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                return "osx";
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                return "linux";
-            else
-                throw new PlatformNotSupportedException("Unsupported OS platform");
-        }
-        
-        /// <summary>
-        /// Gets the architecture identifier for the download URL.
-        /// </summary>
-        private string GetArchitecture()
-        {
-            return RuntimeInformation.ProcessArchitecture switch
-            {
-                Architecture.X64 => "x64",
-                Architecture.Arm64 => "arm64",
-                _ => throw new PlatformNotSupportedException($"Unsupported architecture: {RuntimeInformation.ProcessArchitecture}")
-            };
-        }
-        
+
+
         /// <summary>
         /// Recursively copies a directory.
         /// </summary>
@@ -344,94 +332,22 @@ namespace upeko.Services
             {
                 Directory.CreateDirectory(destinationDir);
             }
-            
+
             // Copy all files
-            foreach (string file in Directory.GetFiles(sourceDir))
+            foreach (var file in Directory.GetFiles(sourceDir))
             {
-                string fileName = Path.GetFileName(file);
-                string destFile = Path.Combine(destinationDir, fileName);
+                var fileName = Path.GetFileName(file);
+                var destFile = Path.Combine(destinationDir, fileName);
                 File.Copy(file, destFile, true);
             }
-            
+
             // Recursively copy all subdirectories
-            foreach (string dir in Directory.GetDirectories(sourceDir))
+            foreach (var dir in Directory.GetDirectories(sourceDir))
             {
-                string dirName = Path.GetFileName(dir);
-                string destDir = Path.Combine(destinationDir, dirName);
+                var dirName = Path.GetFileName(dir);
+                var destDir = Path.Combine(destinationDir, dirName);
                 CopyDirectory(dir, destDir);
             }
         }
-    }
-
-    /// <summary>
-    /// Model representing a GitHub release.
-    /// </summary>
-    public class ReleaseModel
-    {
-        /// <summary>
-        /// The name of the release.
-        /// </summary>
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// The tag name of the release (e.g., "v1.0.0").
-        /// </summary>
-        [JsonPropertyName("tag_name")]
-        public string? TagName { get; set; }
-
-        /// <summary>
-        /// The URL to the release page.
-        /// </summary>
-        [JsonPropertyName("html_url")]
-        public string? HtmlUrl { get; set; }
-
-        /// <summary>
-        /// The release description/body.
-        /// </summary>
-        [JsonPropertyName("body")]
-        public string? Body { get; set; }
-
-        /// <summary>
-        /// Whether this is a prerelease.
-        /// </summary>
-        [JsonPropertyName("prerelease")]
-        public bool IsPrerelease { get; set; }
-
-        /// <summary>
-        /// The published date of the release.
-        /// </summary>
-        [JsonPropertyName("published_at")]
-        public DateTime PublishedAt { get; set; }
-
-        /// <summary>
-        /// The assets (downloadable files) of the release.
-        /// </summary>
-        [JsonPropertyName("assets")]
-        public ReleaseAsset[]? Assets { get; set; }
-    }
-
-    /// <summary>
-    /// Model representing a GitHub release asset (downloadable file).
-    /// </summary>
-    public class ReleaseAsset
-    {
-        /// <summary>
-        /// The name of the asset.
-        /// </summary>
-        [JsonPropertyName("name")]
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// The URL to download the asset.
-        /// </summary>
-        [JsonPropertyName("browser_download_url")]
-        public string? DownloadUrl { get; set; }
-
-        /// <summary>
-        /// The size of the asset in bytes.
-        /// </summary>
-        [JsonPropertyName("size")]
-        public long Size { get; set; }
     }
 }

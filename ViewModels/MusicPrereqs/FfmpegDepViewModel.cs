@@ -46,7 +46,7 @@ namespace upeko.ViewModels
                 using var p = Process.Start(psi);
                 try
                 {
-                    p.Kill();
+                    p?.Kill();
                 }
                 catch
                 {
@@ -75,7 +75,7 @@ namespace upeko.ViewModels
                         await stream.CopyToAsync(fs);
                     }
 
-                    var ffmpegPath = Path.Combine(Path.GetPathRoot(Environment.SystemDirectory), "ffmpeg");
+                    var ffmpegPath = Path.Combine(Path.GetPathRoot(Environment.SystemDirectory)!, "ffmpeg");
 
                     Directory.CreateDirectory(ffmpegPath);
                     ZipFile.ExtractToDirectory("./ffmpeg.zip", ffmpegPath);

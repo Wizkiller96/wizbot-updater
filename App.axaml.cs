@@ -14,8 +14,8 @@ namespace upeko;
 
 public partial class App : Application
 {
-    public static ServiceProvider Services { get; private set; }
-    public static Window MainWindow { get; private set; }
+    public static ServiceProvider Services { get; private set; } = null!;
+    public static Window MainWindow { get; private set; } = null!;
 
     public override void Initialize()
     {

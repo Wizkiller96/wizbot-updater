@@ -2,179 +2,94 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using System.Windows.Input;
 using Avalonia.Media;
+using Avalonia.Interactivity;
 using ReactiveUI;
-using upeko.Models;
 using upeko.Services;
+using System.Linq;
+using System.Windows.Input;
+using Avalonia.Controls;
 
 namespace upeko.ViewModels
 {
-    public class BotViewModel : ViewModelBase
+    /// <summary>
+    /// ViewModel for bot management and interaction
+    /// </summary>
+    public partial class BotViewModel : ViewModelBase
     {
-        private readonly BotListViewModel _parent;
-        private readonly BotItemViewModel _botItem;
-        private readonly BotModel _model;
-        private readonly UpdateChecker _updateChecker;
-        private readonly IDialogService _dialogService;
+        #region Properties
 
-        private string _consoleOutput;
-        private bool _isDownloading;
-        private string _downloadStatus;
-        private double _downloadProgress;
+        private BotItemViewModel _bot;
 
-        public enum MainActivityState
+        public BotItemViewModel Bot
         {
-            Running,
-            Runnable,
-            Updatable,
-            Downloadable
+            get => _bot;
+            set => this.RaiseAndSetIfChanged(ref _bot, value);
         }
 
-        public string Name
+        private ReleaseModel _latestRelease;
+
+        public ReleaseModel LatestReleaseModel
         {
-            get => _model.Name;
-            set
-            {
-                if (_model.Name != value)
-                {
-                    _model.Name = value;
-                    this.RaisePropertyChanged();
-                }
-            }
+            get => _latestRelease;
+            set => this.RaiseAndSetIfChanged(ref _latestRelease, value);
         }
 
-        public string Icon
-        {
-            get => _botItem.Icon;
-        }
-
-        public string Version
-        {
-            get => _model.Version ?? "None";
-            set
-            {
-                if (_model.Version != value)
-                {
-                    _model.Version = value;
-                    this.RaisePropertyChanged();
-                    this.RaisePropertyChanged(nameof(IsUpdateAvailable));
-                    this.RaisePropertyChanged(nameof(IsBotDownloaded));
-                    this.RaisePropertyChanged(nameof(UpdateButtonText));
-                    this.RaisePropertyChanged(nameof(CanStartBot));
-                    this.RaisePropertyChanged(nameof(State));
-                }
-            }
-        }
-
-        public bool IsUpdateAvailable
-        {
-            get => _updateChecker.IsUpdateAvailable(_model.Version);
-        }
-
-        public bool IsBotDownloaded
-        {
-            get => _model.Version != null;
-        }
-
-        public bool CanStartBot
-        {
-            get => State != MainActivityState.Running && !IsDownloading;
-        }
-
-        public string UpdateButtonText
-        {
-            get => IsBotDownloaded ? "Update" : "Download";
-        }
-
-        public bool UpdateAvailable
-        {
-            get => _botItem.UpdateAvailable;
-            set
-            {
-                if (_botItem.UpdateAvailable != value)
-                {
-                    _botItem.UpdateAvailable = value;
-                    this.RaisePropertyChanged();
-                }
-            }
-        }
-
-        public Uri? BotPathUri
-        {
-            get => _model.PathUri;
-        }
-
-        public string? BotPath
-        {
-            get => _model.PathUri?.ToString();
-            set
-            {
-                if (_model.PathUri?.ToString() != value
-                    && Uri.TryCreate(value, UriKind.Absolute, out var uri))
-                {
-                    _model.PathUri = uri;
-                    this.RaisePropertyChanged();
-                }
-            }
-        }
-
-        public string? ExecutablePath
-        {
-            get => _model.PathUri != null ? System.IO.Path.Combine(_model.PathUri.LocalPath, "upeko") : null;
-        }
-
-        public string Status
-        {
-            get => _botItem.Status;
-            set
-            {
-                if (_botItem.Status != value)
-                {
-                    _botItem.Status = value;
-                    this.RaisePropertyChanged();
-                    this.RaisePropertyChanged(nameof(StatusColor));
-                    this.RaisePropertyChanged(nameof(RunButtonText));
-                    this.RaisePropertyChanged(nameof(RunButtonBackground));
-                    this.RaisePropertyChanged(nameof(RunButtonIcon));
-                    this.RaisePropertyChanged(nameof(CanStartBot));
-                    this.RaisePropertyChanged(nameof(State));
-                }
-            }
-        }
+        private MainActivityState _state;
 
         public MainActivityState State
         {
-            get
-            {
-                // If the bot is running, it's in the Running state
-                if (Status == "Running")
-                    return MainActivityState.Running;
-                
-                // If the bot is not downloaded (version is null), it's in the Downloadable state
-                if (_model.Version == null)
-                    return MainActivityState.Downloadable;
-                
-                // If an update is available, it's in the Updatable state, otherwise it's Runnable
-                return IsUpdateAvailable ? MainActivityState.Updatable : MainActivityState.Runnable;
-            }
+            get => _state;
+            set => this.RaiseAndSetIfChanged(ref _state, value);
         }
 
-        public IBrush StatusColor
+        public BotListViewModel Parent { get; }
+
+        private Process? _process;
+
+        public bool IsRunning
+            => _process != null;
+
+        public string ExecutablePath
+            => Path.Combine(Bot.Location ?? string.Empty, PlatformSpecific.GetExecutableName());
+
+        public bool IsUpdateAvailable
+            => UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
+
+        public bool IsBotDownloaded
+            => !string.IsNullOrWhiteSpace(Bot?.Version);
+
+        public string UpdateButtonText
+            => IsBotDownloaded ? "Update" : "Download";
+
+        private bool _isDownloading;
+
+        public bool IsDownloading
         {
-            get
-            {
-                return Status switch
-                {
-                    "Running" => new SolidColorBrush(Color.Parse("#107C10")), // Green
-                    "Stopped" => new SolidColorBrush(Color.Parse("#FFB900")), // Yellow
-                    "Error" => new SolidColorBrush(Color.Parse("#D83B01")), // Red
-                    "Updating..." => new SolidColorBrush(Color.Parse("#0078D7")), // Blue
-                    "Downloading..." => new SolidColorBrush(Color.Parse("#0078D7")), // Blue
-                    _ => new SolidColorBrush(Color.Parse("#797775")) // Default gray
-                };
-            }
+            get => _isDownloading;
+            set => this.RaiseAndSetIfChanged(ref _isDownloading, value);
         }
+
+        public bool IsNotDownloading
+            => !IsDownloading;
+
+        private double _downloadProgress;
+
+        public double DownloadProgress
+        {
+            get => _downloadProgress;
+            set => this.RaiseAndSetIfChanged(ref _downloadProgress, value);
+        }
+
+        private string _downloadStatus = string.Empty;
+
+        public string DownloadStatus
+        {
+            get => _downloadStatus;
+            set => this.RaiseAndSetIfChanged(ref _downloadStatus, value);
+        }
+
+        private string _consoleOutput = string.Empty;
 
         public string ConsoleOutput
         {
@@ -182,182 +97,332 @@ namespace upeko.ViewModels
             set => this.RaiseAndSetIfChanged(ref _consoleOutput, value);
         }
 
-        public bool AutoStart
-        {
-            get => _model.AutoStart;
-            set
-            {
-                if (_model.AutoStart != value)
-                {
-                    _model.AutoStart = value;
-                    this.RaisePropertyChanged();
-                }
-            }
-        }
+        private bool _deleteConfirm;
 
-        public string RunButtonText
-            => State == MainActivityState.Running ? "Stop" : "Start";
-
-        public IBrush RunButtonBackground
-            => State == MainActivityState.Running
-                ? new SolidColorBrush(Color.Parse("#D83B01")) // Red for stop
-                : new SolidColorBrush(Color.Parse("#107C10")); // Green for start
-
-        public IBrush RunButtonForeground
-            => new SolidColorBrush(Colors.White);
-        
-
-        public string RunButtonIcon
-            => State == MainActivityState.Running
-                ? "M14,19H18V5H14M6,19H10V5H6V19Z" // Stop icon
-                : "M8,5.14V19.14L19,12.14L8,5.14Z"; // Play icon
-        
-        private bool _deleteConfirm = false;
         public bool DeleteConfirm
         {
             get => _deleteConfirm;
             set => this.RaiseAndSetIfChanged(ref _deleteConfirm, value);
         }
 
-        public bool IsDownloading
-        {
-            get => _isDownloading;
-            private set
+        public string RunButtonText
+            => IsRunning ? "Stop" : "Start";
+
+        public string RunButtonIcon
+            => IsRunning
+                ? "M14,19H18V5H14M6,19H10V5H6V19Z" // Stop icon
+                : "M8,5.14V19.14L19,12.14L8,5.14Z"; // Play icon
+
+        public IBrush RunButtonBackground
+            => IsRunning
+                ? new SolidColorBrush(Color.Parse("#E74C3C")) // Red for stop
+                : new SolidColorBrush(Color.Parse("#2ECC71")); // Green for start
+
+        public string BotPath
+            => Bot?.Location ?? string.Empty;
+
+        public string Name
+            => Bot?.Name ?? string.Empty;
+
+        public string Icon
+            => Bot?.Icon ?? string.Empty;
+
+        public string Status
+            => State switch
             {
-                this.RaiseAndSetIfChanged(ref _isDownloading, value);
-                this.RaisePropertyChanged(nameof(IsNotDownloading));
-                this.RaisePropertyChanged(nameof(CanStartBot));
-            }
-        }
+                MainActivityState.Running => "Running",
+                MainActivityState.Runnable => "Ready",
+                MainActivityState.Updatable => "Update Available",
+                MainActivityState.Downloadable => "Not Downloaded",
+                _ => "Unknown"
+            };
 
-        public bool IsNotDownloading => !IsDownloading;
+        public IBrush StatusColor
+            => State switch
+            {
+                MainActivityState.Running => new SolidColorBrush(Color.Parse("#2ECC71")), // Green
+                MainActivityState.Runnable => new SolidColorBrush(Color.Parse("#3498DB")), // Blue
+                MainActivityState.Updatable => new SolidColorBrush(Color.Parse("#F39C12")), // Orange
+                MainActivityState.Downloadable => new SolidColorBrush(Color.Parse("#95A5A6")), // Gray
+                _ => new SolidColorBrush(Color.Parse("#95A5A6")) // Gray
+            };
 
-        public string DownloadStatus
-        {
-            get => _downloadStatus;
-            private set => this.RaiseAndSetIfChanged(ref _downloadStatus, value);
-        }
+        public string? Version
+            => Bot?.Version;
 
-        public double DownloadProgress
-        {
-            get => _downloadProgress;
-            private set => this.RaiseAndSetIfChanged(ref _downloadProgress, value);
-        }
+        #endregion
+
+        #region Commands
 
         public ICommand BackCommand { get; }
-        public ICommand ToggleRunningCommand { get; }
-        public ICommand UpdateCommand { get; }
         public ICommand SelectBotPathCommand { get; }
         public ICommand DeleteIntentCommand { get; }
         public ICommand DeleteBotCommand { get; }
         public ICommand DeleteCancelCommand { get; }
-        public ICommand CheckForUpdatesCommand { get; }
-        public ICommand OpenCredsFileCommand { get; }
         public ICommand OpenDataFolderCommand { get; }
+        public ICommand OpenCredsFileCommand { get; }
+        public ICommand ToggleRunningCommand { get; }
+        public ICommand CheckForUpdatesCommand { get; }
+        public ICommand UpdateCommand { get; }
 
-        public ReleaseModel? LatestRelease { get; private set; }
+        #endregion
 
-        public BotViewModel(BotListViewModel parent, BotItemViewModel botItem)
+        #region Constructor
+
+        public BotViewModel()
         {
-            _parent = parent;
-            _botItem = botItem;
-            _model = botItem.Model;
-            _updateChecker = UpdateChecker.Instance;
-            _dialogService = App.Services.GetService(typeof(IDialogService)) as IDialogService
-                           ?? throw new InvalidOperationException("Failed to resolve IDialogService");
+            DeleteIntentCommand = ReactiveCommand.Create(ExecuteDeleteIntentCommand);
+            DeleteBotCommand = ReactiveCommand.Create(ExecuteDeleteBotCommand);
+            DeleteCancelCommand = ReactiveCommand.Create(ExecuteDeleteCancelCommand);
+            OpenDataFolderCommand = ReactiveCommand.Create(OpenDataClick);
+            OpenCredsFileCommand = ReactiveCommand.Create(OpenCredsClick);
+            ToggleRunningCommand = ReactiveCommand.Create(MainButtonClick);
+            CheckForUpdatesCommand = ReactiveCommand.Create(ExecuteCheckForUpdatesCommand);
+            UpdateCommand = ReactiveCommand.Create(UpdateButtonClick);
+            BackCommand = ReactiveCommand.Create(ExecuteBackCommand);
+            SelectBotPathCommand = ReactiveCommand.Create(ExecuteSelectBotPathCommand);
 
-            // Subscribe to update notifications
-            _updateChecker.OnNewVersionFound += OnNewVersionFound;
-            _updateChecker.OnDownloadProgress += OnDownloadProgress;
-            _updateChecker.OnDownloadComplete += OnDownloadComplete;
 
-            // Initialize console output
-            _consoleOutput = "Welcome to NadekoBot\n\n" +
-                             "> Version: " + (_model.Version ?? "Not installed") + "\n" +
-                             "> Status: " + _botItem.Status + "\n\n";
-
-            // Subscribe to model property changes
-            _model.PropertyChanged += (_, args) =>
-            {
-                // When the model changes, raise property changed for the corresponding property
-                this.RaisePropertyChanged(args.PropertyName);
-            };
-
-            // Initialize commands
-            BackCommand = ReactiveCommand.Create(ExecuteBack);
-            ToggleRunningCommand = ReactiveCommand.Create(ExecuteToggleRunning);
-            UpdateCommand = ReactiveCommand.Create(() => _ = Update());
-            SelectBotPathCommand = ReactiveCommand.CreateFromTask(ExecuteSelectBotPath);
-            DeleteBotCommand = ReactiveCommand.Create(ExecuteDeleteBot);
-            DeleteIntentCommand = ReactiveCommand.Create(ExecuteDeleteIntent);
-            DeleteCancelCommand = ReactiveCommand.Create(ExecuteCancelDelete);
-            CheckForUpdatesCommand = ReactiveCommand.CreateFromTask(ExecuteCheckForUpdates);
-            OpenCredsFileCommand = ReactiveCommand.Create(ExecuteOpenCredsFile);
-            OpenDataFolderCommand = ReactiveCommand.Create(ExecuteOpenDataFolder);
-
-            // Check for updates when the view model is created
-            _ = ExecuteCheckForUpdates();
+            UpdateChecker.Instance.OnNewVersionFound += OnNewVersionFound;
+            UpdateChecker.Instance.OnDownloadProgress += OnDownloadProgress;
+            UpdateChecker.Instance.OnDownloadComplete += OnDownloadComplete;
         }
 
-        private void OnNewVersionFound(ReleaseModel release)
+        public BotViewModel(BotListViewModel parent, BotItemViewModel model) : this()
         {
-            // Update the UI to show that a new version is available
-            UpdateAvailable = true;
-            
-            // Set the latest release
-            LatestRelease = release;
-            
-            // Force UI update
+            _bot = model;
+            Parent = parent;
+            ReloadVersionFromPath();
+            UpdateCurrentActivity();
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Checks whether there's a valid Bot file inside the selected folder, and updates the version if there is
+        /// </summary>
+        public void ReloadVersionFromPath()
+        {
+            if (Bot.Location == null)
+                return;
+
+            if (!File.Exists(ExecutablePath))
+            {
+                Bot.Version = null;
+                return;
+            }
+
+            try
+            {
+                using var p = Process.Start(new ProcessStartInfo()
+                {
+                    FileName = ExecutablePath,
+                    Arguments = "--version",
+                    UseShellExecute = false
+                });
+
+                var info = p.StandardOutput.ReadToEnd();
+                Bot.Version = info.Trim();
+            }
+            catch (Exception)
+            {
+                Bot.Version = null;
+                return;
+            }
+
+            this.RaisePropertyChanged(nameof(IsBotDownloaded));
             this.RaisePropertyChanged(nameof(IsUpdateAvailable));
             this.RaisePropertyChanged(nameof(UpdateButtonText));
-            this.RaisePropertyChanged(nameof(State));
+            UpdateCurrentActivity();
         }
 
-        private void OnDownloadProgress(double progress, string status)
+        /// <summary>
+        /// Updates the current activity state based on the bot's status
+        /// </summary>
+        private void UpdateCurrentActivity()
         {
-            DownloadProgress = progress;
-            DownloadStatus = status;
-        }
-
-        private void OnDownloadComplete(bool success, string message)
-        {
-            if (success)
-            {
-                Version = message; // Update the version with the downloaded version
-                Status = "Stopped";
-                UpdateAvailable = false; // Ensure the bot is in Runnable state
-            }
+            if (!IsBotDownloaded)
+                State = MainActivityState.Downloadable;
+            else if (IsRunning)
+                State = MainActivityState.Running;
+            else if (IsUpdateAvailable)
+                State = MainActivityState.Updatable;
             else
+                State = MainActivityState.Runnable;
+        }
+
+        /// <summary>
+        /// Called when a new version is found by the UpdateChecker
+        /// </summary>
+        private void OnNewVersionFound(ReleaseModel newVer)
+        {
+            LatestReleaseModel = newVer;
+            this.RaisePropertyChanged(nameof(IsUpdateAvailable));
+            this.RaisePropertyChanged(nameof(UpdateButtonText));
+            UpdateCurrentActivity();
+        }
+
+        /// <summary>
+        /// Downloads the latest version and installs it
+        /// </summary>
+        private async Task DownloadAndInstallBotAsync()
+        {
+            try
             {
-                Status = "Error";
+                // Reset download state
+                IsDownloading = true;
+                DownloadProgress = 0;
+                DownloadStatus = "Preparing to download...";
+
+                // Ensure UI updates
+                this.RaisePropertyChanged(nameof(IsNotDownloading));
+
+                // Start the download
+                await UpdateChecker.Instance.DownloadAndInstallBotAsync(
+                    Bot.Name,
+                    Bot.Location
+                );
+
+                // Success will be handled by the OnDownloadComplete handler
+            }
+            catch (Exception ex)
+            {
+                // Handle failure directly if exception occurs
+                IsDownloading = false;
+                DownloadStatus = $"Error: {ex.Message}";
+
+                // Ensure UI updates
+                this.RaisePropertyChanged(nameof(IsNotDownloading));
+
+                // Log the exception
+                Console.WriteLine($"Error downloading installer: {ex}");
+            }
+        }
+
+        /// <summary>
+        /// Called to delete this bot from the updater
+        /// </summary>
+        /// <param name="wipe">Whether to wipe the folder from the disk too.</param>
+        public void Delete(bool wipe)
+        {
+            if (Bot.Location == null)
+                return;
+
+            Parent.RemoveBot(Bot);
+        }
+
+        /// <summary>
+        /// Download the bot, if able
+        /// </summary>
+        public async Task Download()
+        {
+            if (State != MainActivityState.Downloadable && !IsUpdateAvailable)
+            {
+                throw new InvalidOperationException("Bot is already downloaded");
             }
 
-            IsDownloading = false;
-            this.RaisePropertyChanged(nameof(State));
-            this.RaisePropertyChanged(nameof(IsUpdateAvailable));
-        }
-        
-        private void ExecuteCancelDelete()
-        {
-            DeleteConfirm = false;
-        }
-        
-        private void ExecuteDeleteIntent()
-        {
-            DeleteConfirm = true;
-        }
-        
-        private void ExecuteDeleteBot()
-        {
-            _parent.RemoveBot(_botItem);
-        }
-        
-        private void ExecuteBack()
-        {
-            _parent.NavigateBack();
+            UpdateCurrentActivity();
+            await DownloadAndInstallBotAsync();
         }
 
-        private void ExecuteToggleRunning()
+        /// <summary>
+        /// Update the bot, if able
+        /// </summary>
+        public async Task Update()
+        {
+            if (State != MainActivityState.Updatable && State != MainActivityState.Downloadable)
+            {
+                throw new InvalidOperationException("No update is available.");
+            }
+
+            UpdateCurrentActivity();
+            await DownloadAndInstallBotAsync();
+        }
+
+        /// <summary>
+        /// Run the bot, if able
+        /// </summary>
+        public void Run()
+        {
+            if (State != MainActivityState.Runnable && State != MainActivityState.Updatable)
+            {
+                throw new InvalidOperationException(
+                    "You can't run this bot. You either haven't downloaded it, or it's already running.");
+            }
+
+            if (string.IsNullOrEmpty(ExecutablePath) || !File.Exists(ExecutablePath))
+            {
+                throw new InvalidOperationException("Executable path is invalid or does not exist.");
+            }
+
+            var workDir = Path.GetFullPath(ExecutablePath);
+
+            _process = Process.Start(new ProcessStartInfo
+            {
+                FileName = ExecutablePath,
+                WorkingDirectory = workDir
+            });
+
+            var p = _process;
+            _ = Task.Run(async () =>
+            {
+                await p.WaitForExitAsync();
+                // Use dispatcher to update UI thread
+                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    _process = null;
+                    this.RaisePropertyChanged(nameof(IsRunning));
+                    UpdateCurrentActivity();
+                });
+
+                p.Dispose();
+            });
+
+            UpdateCurrentActivity();
+        }
+
+        /// <summary>
+        /// Stop the bot, if running
+        /// </summary>
+        public void Stop()
+        {
+            if (State != MainActivityState.Running)
+            {
+                throw new InvalidOperationException("You can't stop the bot, it's not running.");
+            }
+
+            using var p = _process;
+            _process = null;
+            try
+            {
+                p.Kill();
+            }
+            catch
+            {
+            }
+
+            UpdateCurrentActivity();
+        }
+
+        #endregion
+
+        #region UI Event Handlers
+
+        private void UpdateButtonClick()
+        {
+            if (IsUpdateAvailable)
+            {
+                _ = Update();
+            }
+            else if (!IsBotDownloaded)
+            {
+                _ = Download();
+            }
+        }
+
+        private void MainButtonClick()
         {
             switch (State)
             {
@@ -365,200 +430,140 @@ namespace upeko.ViewModels
                     Stop();
                     break;
                 case MainActivityState.Runnable:
-                    Run();
-                    break;
                 case MainActivityState.Updatable:
                     Run();
                     break;
-                case MainActivityState.Downloadable:
-                    _ = Download();
-                    break;
             }
         }
 
-        private void Run()
+        private async Task OnUpdateButtonClick(object sender, RoutedEventArgs e)
         {
-            // Start the bot
-            Status = "Running";
+            // This method appears to be referencing UI elements that aren't defined in the ViewModel
+            // Keeping the method signature for compatibility, but implementation should be adjusted
+            await UpdateChecker.Instance.CheckForUpdatesAsync();
         }
 
-        private void Stop()
+        private void OpenCredsClick()
         {
-            // Stop the bot
-            Status = "Stopped";
-        }
-
-        private async Task ExecuteCheckForUpdates()
-        {
-            if (IsDownloading)
-            {
-                return; // Don't check for updates while downloading
-            }
-            
-            string? error = await _updateChecker.CheckForUpdatesAsync();
-            
-            // If there's an update available, the OnNewVersionFound event will handle the UI update
-        }
-
-        private async Task ExecuteUpdate()
-        {
-            if (IsDownloading)
-            {
-                return; // Prevent multiple downloads
-            }
-
-            // Make sure the bot is stopped before updating
-            if (State == MainActivityState.Running)
-            {
-                Stop(); // Stop the bot
-            }
-
-            await Update();
-        }
-
-        private async Task Update()
-        {
-            IsDownloading = true;
-            Status = "Updating...";
-
-            // Get the bot path from the model
-            string? botPathStr = _model.PathUri?.LocalPath;
-            if (string.IsNullOrEmpty(botPathStr))
-            {
-                IsDownloading = false;
-                Status = "Error";
+            if (Bot.Location == null)
                 return;
-            }
 
-            // Start the download and installation process
-            string? error = await _updateChecker.DownloadAndInstallBotAsync(_model.Name, botPathStr);
-            
-            if (error != null)
+            var credsFile = Path.Combine(Bot.Location, "data", "creds.yml");
+            var credsExampleFile = Path.Combine(Bot.Location, "data", "creds_example.yml");
+            if (!File.Exists(credsFile))
             {
-                Status = "Error";
-                IsDownloading = false;
-            }
-            // The OnDownloadComplete event will handle the UI update when download is complete
-        }
-
-        private async Task Download()
-        {
-            IsDownloading = true;
-            Status = "Downloading...";
-
-            // Get the bot path from the model
-            string? botPathStr = _model.PathUri?.LocalPath;
-            if (string.IsNullOrEmpty(botPathStr))
-            {
-                IsDownloading = false;
-                Status = "Error";
-                return;
-            }
-
-            // Start the download and installation process
-            string? error = await _updateChecker.DownloadAndInstallBotAsync(_model.Name, botPathStr);
-            
-            if (error != null)
-            {
-                Status = "Error";
-                IsDownloading = false;
-            }
-            // The OnDownloadComplete event will handle the UI update when download is complete
-        }
-
-        private async Task ExecuteSelectBotPath()
-        {
-            try
-            {
-                // Get the current path or default to user documents folder
-                string initialDirectory = _model.PathUri?.LocalPath ?? 
-                    System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "upeko");
-                
-                // Ensure the directory exists for the dialog
-                System.IO.Directory.CreateDirectory(initialDirectory);
-                
-                // Show folder picker dialog
-                string? selectedPath = await _dialogService.ShowFolderPickerAsync("Select Bot Location", initialDirectory);
-                
-                if (!string.IsNullOrEmpty(selectedPath))
-                {
-                    // Update the bot path
-                    BotPath = selectedPath;
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle error silently
-            }
-        }
-
-        private void ExecuteOpenCredsFile()
-        {
-            try
-            {
-                var credsFile = System.IO.Path.Combine(ExecutablePath ?? "", "data", "creds.yml");
-                var credsExampleFile = System.IO.Path.Combine(ExecutablePath ?? "", "data", "creds_example.yml");
-                
-                if (!System.IO.File.Exists(credsFile))
-                {
-                    if (!System.IO.File.Exists(credsExampleFile))
-                    {
-                        return;
-                    }
-
-                    System.IO.File.Copy(credsExampleFile, credsFile);
-                }
-
-                // Open the file in the default editor
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = PlatformSpecific.GetNameOfFileExplorer(),
-                    Arguments = System.IO.Path.GetFullPath(credsFile),
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                // Handle error silently
-            }
-        }
-
-        private void ExecuteOpenDataFolder()
-        {
-            try
-            {
-                var dataFolder = System.IO.Path.Combine(_model.PathUri?.LocalPath ?? "", "data");
-                
-                if (!System.IO.Directory.Exists(dataFolder))
+                if (!File.Exists(credsExampleFile))
                 {
                     return;
                 }
-                
-                // Open the folder in explorer
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = PlatformSpecific.GetNameOfFileExplorer(),
-                    Arguments = System.IO.Path.GetFullPath(dataFolder),
-                    UseShellExecute = true
-                });
+
+                File.Copy(credsExampleFile, credsFile);
             }
-            catch (Exception ex)
+
+            Process.Start(PlatformSpecific.GetNameOfFileExplorer(), Path.GetFullPath(credsFile));
+        }
+
+        private void OpenDataClick()
+        {
+            if (Bot.Location == null)
+                return;
+
+            var dataFolder = Path.Combine(Bot.Location, "data");
+            if (!Directory.Exists(dataFolder))
             {
+                return;
+            }
+
+            Process.Start(PlatformSpecific.GetNameOfFileExplorer(), dataFolder);
+        }
+
+        private void ExecuteBackCommand()
+        {
+            Parent?.NavigateBack();
+        }
+
+        private async Task ExecuteSelectBotPathCommand()
+        {
+            var dialog = new OpenFolderDialog()
+            {
+                Directory = Bot.Location ?? string.Empty
+            };
+
+            var result = await dialog.ShowAsync(App.MainWindow);
+
+            if (result == null)
+                return;
+            
+            Bot.Location = result;
+        }
+
+        private void ExecuteDeleteIntentCommand()
+        {
+            DeleteConfirm = true;
+        }
+
+        private void ExecuteDeleteBotCommand()
+        {
+            Delete(true);
+            DeleteConfirm = false;
+        }
+
+        private void ExecuteDeleteCancelCommand()
+        {
+            DeleteConfirm = false;
+        }
+
+        private bool _canCheckForUpdates = true;
+
+        public bool CanCheckForUpdates
+        {
+            get => _canCheckForUpdates;
+            set => this.RaiseAndSetIfChanged(ref _canCheckForUpdates, value);
+        }
+
+        private async Task ExecuteCheckForUpdatesCommand()
+        {
+            CanCheckForUpdates = false;
+            try
+            {
+                await UpdateChecker.Instance.CheckForUpdatesAsync();
+            }
+            finally
+            {
+                CanCheckForUpdates = true;
             }
         }
-    }
-}
 
-public static class PlatformSpecific
-{
-    public static string GetNameOfFileExplorer()
-    {
-        return Environment.OSVersion.Platform switch
+        private void OnDownloadProgress(double progress, string status)
         {
-            PlatformID.Win32NT => "explorer.exe",
-            PlatformID.Unix => "xdg-open",
-            PlatformID.MacOSX => "open",
-            _ => throw new PlatformNotSupportedException("Unsupported platform: " + Environment.OSVersion.Platform)
-        };
+            DownloadProgress = progress;
+            DownloadStatus = status;
+            IsDownloading = true;
+
+            // Update UI properties
+            this.RaisePropertyChanged(nameof(IsNotDownloading));
+        }
+
+        private void OnDownloadComplete(bool success, string version)
+        {
+            IsDownloading = false;
+
+            // Update UI properties
+            this.RaisePropertyChanged(nameof(IsNotDownloading));
+
+            if (success)
+            {
+                // Reload the version information
+                ReloadVersionFromPath();
+            }
+            else
+            {
+                // Handle download failure
+                DownloadStatus = $"Download failed: {version}";
+                this.RaisePropertyChanged(nameof(DownloadStatus));
+            }
+        }
+
+        #endregion
     }
 }

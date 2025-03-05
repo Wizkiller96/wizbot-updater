@@ -59,7 +59,7 @@ namespace upeko.ViewModels
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
                     // Delete the old yt-dlp directory, if it exists
-                    var ytdlPath = Path.Combine(Path.GetPathRoot(Environment.SystemDirectory), "yt-dlp");
+                    var ytdlPath = Path.Combine(Path.GetPathRoot(Environment.SystemDirectory)!, "yt-dlp");
 
                     if (Directory.Exists(ytdlPath))
                         Directory.Delete(ytdlPath, true);
@@ -86,7 +86,7 @@ namespace upeko.ViewModels
                     return true;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // MessageBox.Show(ex.ToString(), "YoutubeDLP installation failed.");
                 // todo: Add an error message box

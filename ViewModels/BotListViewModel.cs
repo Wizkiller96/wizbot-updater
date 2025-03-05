@@ -79,19 +79,22 @@ public class BotListViewModel : ViewModelBase
 
     public void AddNewBot()
     {
-        var botName = $"Bot {Guid.NewGuid().ToString().Substring(0, 5)}";
+        var guid = Guid.NewGuid();
+        var first5 = guid.ToString().Substring(0, 5);
+        var botName = $"bot-{first5}";
 
         // Create a default path in the user's documents folder
         string defaultPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), 
-            "upeko", 
+            Environment.GetFolderPath(Environment.SpecialFolder.Personal),
+            "upeko",
             botName);
 
         // Create a new bot model
         var botModel = new BotModel()
         {
+            Guid = guid,
             Name = botName,
-            PathUri = new Uri(defaultPath)
+            PathUri = new Uri(defaultPath, UriKind.Absolute)
         };
 
         // Add the bot to the repository
@@ -192,7 +195,7 @@ public class BotItemViewModel : ViewModelBase
 
     public string? Location
     {
-        get => _model.PathUri?.ToString();
+        get => _model.PathUri?.LocalPath;
         set
         {
             if (Uri.TryCreate(value, UriKind.Absolute, out var uri)
@@ -264,7 +267,7 @@ public class BotItemViewModel : ViewModelBase
 
         // Check for updates using the UpdateChecker service
         UpdateAvailable = Services.UpdateChecker.Instance.IsUpdateAvailable(_model.Version);
-        
+
         // Subscribe to update notifications
         Services.UpdateChecker.Instance.OnNewVersionFound += (release) =>
         {
