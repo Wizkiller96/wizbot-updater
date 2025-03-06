@@ -6,7 +6,6 @@ using Avalonia.Media;
 using Avalonia.Interactivity;
 using ReactiveUI;
 using upeko.Services;
-using System.Linq;
 using System.Windows.Input;
 using Avalonia.Controls;
 using AsyncImageLoader;
@@ -21,10 +20,12 @@ namespace upeko.ViewModels
     {
         #region Properties
 
-        private BotModel _bot;
+        private readonly BotModel _bot = null!;
 
         public BotModel Bot
             => _bot;
+
+        public BotListViewModel Parent { get; } = null!;
 
         public string? BotIcon
         {
@@ -63,14 +64,6 @@ namespace upeko.ViewModels
         public string ExecutablePath
             => Path.Combine(BotPath, PlatformSpecific.GetExecutableName());
 
-        private ReleaseModel _latestRelease;
-
-        public ReleaseModel LatestReleaseModel
-        {
-            get => _latestRelease;
-            set => this.RaiseAndSetIfChanged(ref _latestRelease, value);
-        }
-
         private MainActivityState _state;
 
         public MainActivityState State
@@ -90,7 +83,6 @@ namespace upeko.ViewModels
             }
         }
 
-        public BotListViewModel Parent { get; }
 
         private Process? _process;
 
@@ -141,14 +133,6 @@ namespace upeko.ViewModels
         {
             get => _downloadStatus;
             set => this.RaiseAndSetIfChanged(ref _downloadStatus, value);
-        }
-
-        private string _consoleOutput = string.Empty;
-
-        public string ConsoleOutput
-        {
-            get => _consoleOutput;
-            set => this.RaiseAndSetIfChanged(ref _consoleOutput, value);
         }
 
         private bool _deleteConfirm;
@@ -238,7 +222,6 @@ namespace upeko.ViewModels
             SelectAvatarCommand = ReactiveCommand.Create(ExecuteSelectAvatarCommand);
 
 
-            UpdateChecker.Instance.OnNewVersionFound += OnNewVersionFound;
             UpdateChecker.Instance.OnDownloadProgress += OnDownloadProgress;
             UpdateChecker.Instance.OnDownloadComplete += OnDownloadComplete;
         }
@@ -281,8 +264,8 @@ namespace upeko.ViewModels
                     RedirectStandardOutput = true,
                 });
 
-                var info = p.StandardOutput.ReadToEnd();
-                Bot.Version = info.Trim();
+                var info = p?.StandardOutput.ReadToEnd();
+                Bot.Version = info?.Trim();
             }
             catch (Exception ex)
             {
@@ -314,7 +297,6 @@ namespace upeko.ViewModels
         /// </summary>
         private void OnNewVersionFound(ReleaseModel newVer)
         {
-            LatestReleaseModel = newVer;
             UpdateCurrentActivity();
         }
 
@@ -415,18 +397,18 @@ namespace upeko.ViewModels
                 WorkingDirectory = BotPath,
             });
 
-            var p = _process;
             _ = Task.Run(async () =>
             {
-                await p.WaitForExitAsync();
+                if (_process is not null)
+                    await _process.WaitForExitAsync();
                 // Use dispatcher to update UI thread
-                Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     _process = null;
                     UpdateCurrentActivity();
                 });
 
-                p.Dispose();
+                _process?.Dispose();
             });
 
             UpdateCurrentActivity();
@@ -446,7 +428,7 @@ namespace upeko.ViewModels
             _process = null;
             try
             {
-                p.Kill();
+                p?.Kill();
             }
             catch
             {

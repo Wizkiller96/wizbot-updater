@@ -5,7 +5,6 @@ using ReactiveUI;
 using upeko.Models;
 using upeko.Services;
 using System.IO;
-using AsyncImageLoader.Loaders;
 using AsyncImageLoader;
 
 namespace upeko.ViewModels;

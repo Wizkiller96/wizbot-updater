@@ -2,22 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 using upeko.Models;
 
 namespace upeko.Services
 {
     public class JsonBotRepository : IBotRepository
     {
-        // Static, reusable JsonSerializerOptions instances
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            WriteIndented = true
-        };
-
-
         private readonly string _legacyBotsJsonPath;
 
         private readonly string _configFilePath;
@@ -47,7 +40,8 @@ namespace upeko.Services
                 try
                 {
                     var json = File.ReadAllText(_configFilePath);
-                    var config = JsonSerializer.Deserialize<ConfigModel>(json, _jsonSerializerOptions);
+                    var config = JsonSerializer.Deserialize(json,
+                        SourceJsonSerializer.Default.ConfigModel);
                     _config = config ?? new ConfigModel();
 
                     return;
@@ -64,7 +58,7 @@ namespace upeko.Services
                 try
                 {
                     var json = File.ReadAllText(_legacyBotsJsonPath);
-                    var botModels = JsonSerializer.Deserialize<List<BotModel>>(json, _jsonSerializerOptions);
+                    var botModels = JsonSerializer.Deserialize(json, SourceJsonSerializer.Default.ListBotModel);
 
                     // Create a new config with the imported bots
                     _config = new ConfigModel
@@ -100,10 +94,12 @@ namespace upeko.Services
         {
             foreach (var bot in bots)
             {
-                if (bot.PathUri == null) continue;
+                if (bot.PathUri == null)
+                    continue;
 
                 var botPath = bot.PathUri.LocalPath;
-                if (!Directory.Exists(botPath)) continue;
+                if (!Directory.Exists(botPath))
+                    continue;
 
                 try
                 {
@@ -117,7 +113,7 @@ namespace upeko.Services
                     {
                         // Ensure target directory exists
                         Directory.CreateDirectory(Path.GetDirectoryName(newCredsPath)!);
-                        
+
                         // Move the file
                         if (!File.Exists(newCredsPath))
                         {
@@ -129,7 +125,7 @@ namespace upeko.Services
                             var backupPath = newCredsPath + ".bak";
                             if (File.Exists(backupPath))
                                 File.Delete(backupPath);
-                                
+
                             File.Move(newCredsPath, backupPath);
                             File.Move(oldCredsPath, newCredsPath);
                         }
@@ -224,7 +220,7 @@ namespace upeko.Services
                 }
 
                 // Serialize and save the config
-                var json = JsonSerializer.Serialize(_config, _jsonSerializerOptions);
+                var json = JsonSerializer.Serialize(_config, SourceJsonSerializer.Default.ConfigModel);
                 File.WriteAllText(_configFilePath, json);
             }
             catch (Exception ex)

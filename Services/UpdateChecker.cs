@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
 using System.Diagnostics;
+using upeko.Models;
 
 namespace upeko.Services
 {
@@ -128,7 +129,7 @@ namespace upeko.Services
                 var response = await _httpClient.GetAsync(GitHubApiUrl);
                 response.EnsureSuccessStatusCode();
 
-                var newRelease = await response.Content.ReadFromJsonAsync<ReleaseModel>();
+                var newRelease = await response.Content.ReadFromJsonAsync(SourceJsonSerializer.Default.ReleaseModel);
                 if (newRelease != null && (LatestRelease == null || LatestRelease.TagName != newRelease.TagName))
                 {
                     LatestRelease = newRelease;

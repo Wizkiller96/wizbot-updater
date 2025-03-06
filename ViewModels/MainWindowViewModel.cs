@@ -1,15 +1,10 @@
 using System.Diagnostics;
-using System.IO;
-using System.Reactive.Linq;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using ReactiveUI;
-using upeko.Views;
 using System.Threading.Tasks;
-using AsyncImageLoader.Loaders;
-using upeko.Services;
 using AsyncImageLoader;
 using System;
 

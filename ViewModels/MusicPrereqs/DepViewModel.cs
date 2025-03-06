@@ -1,11 +1,7 @@
 using System;
-using System.Collections;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using ReactiveUI;
-using upeko.ViewModels;
-using CommunityToolkit.Mvvm.Input;
 
 namespace upeko.ViewModels
 {

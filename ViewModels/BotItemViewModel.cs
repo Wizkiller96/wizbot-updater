@@ -3,8 +3,6 @@ using System.ComponentModel;
 using System.Windows.Input;
 using Avalonia.Media;
 using ReactiveUI;
-using upeko.Models;
-using upeko.Services;
 
 namespace upeko.ViewModels;
 

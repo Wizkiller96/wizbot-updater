@@ -1,16 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Windows;
-using SharpCompress.Compressors.Xz;
 using SharpCompress.Readers;
-using ZstdSharp;
 
 namespace upeko.ViewModels
 {
