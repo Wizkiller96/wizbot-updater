@@ -35,7 +35,20 @@ jobs:
         dotnet publish -c Release -r ${{ matrix.runtime }} \
           --self-contained \
           -p:Version=${{ github.ref_name }} \
-          -o upeko-${{ matrix.runtime }}
+          -o publish-output
+
+    - name: Rename executable for Windows
+      if: startsWith(github.ref, 'refs/tags/') && contains(matrix.runtime, 'win')
+      run: |
+        mkdir -p upeko-${{ matrix.runtime }}
+        cp publish-output/upeko.exe upeko-${{ matrix.runtime }}/upeko-${{ matrix.runtime }}.exe
+
+    - name: Rename executable for Linux/Mac
+      if: startsWith(github.ref, 'refs/tags/') && (contains(matrix.runtime, 'linux') || contains(matrix.runtime, 'osx'))
+      run: |
+        mkdir -p upeko-${{ matrix.runtime }}
+        cp publish-output/upeko upeko-${{ matrix.runtime }}/upeko-${{ matrix.runtime }}
+        chmod +x upeko-${{ matrix.runtime }}/upeko-${{ matrix.runtime }}
 
     - name: Upload Artifact
       if: startsWith(github.ref, 'refs/tags/')
@@ -57,18 +70,6 @@ jobs:
           pattern: 'upeko-*'
           path: artifacts
 
-      - name: Create archives
-        run: |
-          cd artifacts
-          for dir in */; do
-            runtime="${dir%/}"
-            if [[ "$runtime" == *"win"* ]]; then
-              zip -r "$runtime.zip" "$runtime"
-            else
-              tar -czf "$runtime.tar.gz" "$runtime"
-            fi
-          done
-
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
@@ -81,5 +82,9 @@ jobs:
           draft: false
           prerelease: false
           files: |
-            artifacts/*.zip
-            artifacts/*.tar.gz
+            artifacts/upeko-linux-x64/upeko-linux-x64
+            artifacts/upeko-linux-arm64/upeko-linux-arm64
+            artifacts/upeko-win-x64/upeko-win-x64.exe
+            artifacts/upeko-win-arm64/upeko-win-arm64.exe
+            artifacts/upeko-osx-x64/upeko-osx-x64
+            artifacts/upeko-osx-arm64/upeko-osx-arm64
