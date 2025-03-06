@@ -235,6 +235,7 @@
                             </Button>
                         </StackPanel>
                         <Button Command="{Binding ToggleRunningCommand}"
+                                IsEnabled="{Binding IsBotDownloaded}"
                                 Background="{Binding RunButtonBackground}"
                                 BorderThickness="0"
                                 Padding="15,10"
