@@ -2,18 +2,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:common="clr-namespace:upeko.ViewModels"
+             xmlns:vm="clr-namespace:upeko.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:DataType="common:FfmpegDepViewModel"
-             x:Class="upeko.Views.FfmpegButtonView">
+             x:DataType="vm:DepViewModel"
+             x:Class="upeko.Views.DepButtonView">
+    <UserControl.Resources>
+        <!-- Define reliable colors that work in both light and dark themes -->
+        <Color x:Key="WarningColor">Orange</Color>
+        <Color x:Key="ErrorColor">Red</Color>
+        <Color x:Key="SuccessColor">#28a745</Color>
+        <Color x:Key="ButtonColor">#0366d6</Color>
+    </UserControl.Resources>
     <Border 
         CornerRadius="4"
-        Background="#24292e"
+        Background="{DynamicResource SystemChromeLowColor}"
         Padding="4">
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
             <TextBlock 
-                Text="ffmpeg"
-                Foreground="White"
+                Text="{Binding Name}"
+                Foreground="{DynamicResource SystemBaseHighColor}"
                 FontWeight="Bold"
                 Margin="1"
                 Padding="4,0" />
@@ -21,12 +28,12 @@
             <!-- Checking State - Orange with refresh emoji -->
             <Border 
                 IsVisible="{Binding IsChecking}"
-                Background="Orange" 
+                Background="{DynamicResource WarningColor}" 
                 CornerRadius="2" 
                 Padding="2,0">
                 <TextBlock 
-                    Text="🔄 ..." 
-                    Foreground="White" 
+                    Text="🔄" 
+                    Foreground="{DynamicResource SystemBaseHighColor}" 
                     FontWeight="Bold" 
                     Padding="4,0" />
             </Border>
@@ -34,14 +41,14 @@
             <!-- Not Installed State - Red with thumbs down emoji -->
             <Border 
                 IsVisible="{Binding IsNotInstalled}"
-                Background="Red" 
+                Background="{DynamicResource ErrorColor}" 
                 CornerRadius="2" 
-                Padding="2,0"
+                Padding="1"
                 Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock 
                         Text="👎" 
-                        Foreground="White" 
+                        Foreground="{DynamicResource SystemBaseHighColor}" 
                         FontWeight="Bold"
                         Padding="4,0" />
                     <Button 
@@ -49,21 +56,22 @@
                         Command="{Binding InstallCommand}"
                         Margin="4,0,0,0"
                         Foreground="White"
-                        Background="#0366d6"
+                        Background="{DynamicResource ButtonColor}"
                         Cursor="Hand"
-                        Padding="4,0" />
+                        Padding="4,2"
+                        BorderThickness="0" />
                 </StackPanel>
             </Border>
             
             <!-- Installed State - Green with thumbs up emoji -->
             <Border 
                 IsVisible="{Binding IsInstalled}"
-                Background="#28a745" 
+                Background="{DynamicResource SuccessColor}" 
                 CornerRadius="2" 
                 Padding="2,0">
                 <TextBlock 
                     Text="👍" 
-                    Foreground="White" 
+                    Foreground="{DynamicResource SystemBaseHighColor}" 
                     FontWeight="Bold" 
                     Padding="4,0" />
             </Border>

@@ -1,12 +1,12 @@
-﻿using Avalonia;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
 namespace upeko.Views;
 
-public partial class YtDlpButtonView : UserControl
+public partial class DepButtonView : UserControl
 {
-    public YtDlpButtonView()
+    public DepButtonView()
     {
         InitializeComponent();
     }

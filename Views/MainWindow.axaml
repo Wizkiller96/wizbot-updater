@@ -26,8 +26,8 @@
                 <StackPanel Orientation="Horizontal"
                             HorizontalAlignment="Left"
                             Spacing="2">
-                    <views:FfmpegButtonView DataContext="{Binding FfmpegViewModel}" />
-                    <views:YtDlpButtonView DataContext="{Binding YtDlpViewModel}" />
+                    <views:DepButtonView DataContext="{Binding FfmpegViewModel}" />
+                    <views:DepButtonView DataContext="{Binding YtDlpViewModel}" />
                 </StackPanel>
                 <Button HorizontalAlignment="Right"
                         VerticalAlignment="Center"
