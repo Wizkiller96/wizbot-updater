@@ -9,6 +9,7 @@ using upeko.Services;
 using System.Linq;
 using System.Windows.Input;
 using Avalonia.Controls;
+using AsyncImageLoader;
 
 namespace upeko.ViewModels
 {
@@ -150,6 +151,8 @@ namespace upeko.ViewModels
         public string? Version
             => Bot?.Version;
 
+        public IAsyncImageLoader ImageLoader { get; }
+
         #endregion
 
         #region Commands
@@ -172,6 +175,9 @@ namespace upeko.ViewModels
 
         public BotViewModel()
         {
+            ImageLoader = App.Services.GetService(typeof(IAsyncImageLoader)) as IAsyncImageLoader
+                               ?? throw new InvalidOperationException("Failed to resolve IImageLoaderService");
+            
             DeleteIntentCommand = ReactiveCommand.Create(ExecuteDeleteIntentCommand);
             DeleteBotCommand = ReactiveCommand.Create(ExecuteDeleteBotCommand);
             DeleteCancelCommand = ReactiveCommand.Create(ExecuteDeleteCancelCommand);

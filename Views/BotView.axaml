@@ -22,10 +22,12 @@
                         ClipToBounds="True"
                         Cursor="Hand">
                     <Panel>
-                        <Image asyncImageLoader:ImageLoader.Source="{Binding Icon}"
-                               Stretch="UniformToFill"
-                               Width="64"
-                               Height="64" />
+                        <asyncImageLoader:AdvancedImage
+                            Source="{Binding Icon}"
+                            Loader="{Binding ImageLoader}"
+                            Stretch="UniformToFill"
+                            Width="64"
+                            Height="64" />
                         <Button Background="Transparent"
                                 Width="64"
                                 Height="64"

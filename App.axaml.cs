@@ -1,3 +1,4 @@
+using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
@@ -9,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection;
 using upeko.Services;
 using upeko.ViewModels;
 using upeko.Views;
+using AsyncImageLoader.Loaders;
+using AsyncImageLoader;
 
 namespace upeko;
 
@@ -20,7 +23,7 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
-        
+
         // Configure services
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection);
@@ -31,9 +34,13 @@ public partial class App : Application
     {
         // Register the JsonBotRepository as a singleton
         services.AddSingleton<IBotRepository, JsonBotRepository>();
-        
+
         // Register the DialogService as a singleton
         services.AddSingleton<IDialogService, DialogService>();
+
+        // Register the ImageLoaderService as a singleton
+        services.AddSingleton<IAsyncImageLoader>(
+            new DiskCachedWebImageLoader(Path.Combine(Path.GetFullPath(Path.GetTempPath()), "upeko-cache")));
     }
 
     public override void OnFrameworkInitializationCompleted()

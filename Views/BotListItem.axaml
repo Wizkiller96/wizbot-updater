@@ -23,8 +23,7 @@
                     BorderThickness="1"
                     CornerRadius="4"
                     Padding="2"
-                    BorderBrush="DimGray"
-                    >
+                    BorderBrush="DimGray">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="v"
                                    FontSize="13"
@@ -83,9 +82,10 @@
                             </Border.Background>
                         </Border>
                         <!-- Avatar Image -->
-                        <Image asyncImageLoader:ImageLoader.Source="{Binding Icon}"
-                               Width="64" Height="64"
-                               Stretch="UniformToFill" />
+                        <asyncImageLoader:AdvancedImage Source="{Binding Icon}"
+                                                        Loader="{Binding Parent.ImageLoader}"
+                                                        Width="64" Height="64"
+                                                        Stretch="UniformToFill" />
                     </Panel>
                 </Border>
 

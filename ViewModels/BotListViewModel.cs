@@ -6,6 +6,8 @@ using ReactiveUI;
 using upeko.Models;
 using upeko.Services;
 using System.IO;
+using AsyncImageLoader.Loaders;
+using AsyncImageLoader;
 
 namespace upeko.ViewModels;
 
@@ -38,12 +40,21 @@ public class BotListViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _currentPage, value);
     }
 
+    private readonly IAsyncImageLoader _imageLoaderService;
+
+    public IAsyncImageLoader ImageLoader
+        => _imageLoaderService;
+
 
     public BotListViewModel()
     {
         // Get the bot repository from the service provider
         _botRepository = App.Services.GetService(typeof(IBotRepository)) as IBotRepository
                          ?? throw new InvalidOperationException("Failed to resolve IBotRepository service");
+
+        // Get the ImageLoaderService from the dependency injection container
+        _imageLoaderService = App.Services.GetService(typeof(IAsyncImageLoader)) as IAsyncImageLoader
+                              ?? throw new InvalidOperationException("Failed to resolve IImageLoaderService");
 
         // Initialize collections
         _items = new();
@@ -164,6 +175,9 @@ public class BotItemViewModel : ViewModelBase
             }
         }
     }
+
+    public BotListViewModel Parent
+        => _parent;
 
     public string? Icon
     {
