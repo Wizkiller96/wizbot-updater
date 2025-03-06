@@ -37,14 +37,17 @@
 
                 <!-- Update Available Indicator -->
                 <Border IsVisible="{Binding UpdateAvailable}"
-                        Background="{DynamicResource SystemAccentColor}"
-                        CornerRadius="4"
-                        Padding="3"
+                        Background="#4CAF50"
+                        CornerRadius="10"
+                        Width="20" Height="20"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top">
-                    <TextBlock Text="Update!"
-                               FontSize="10"
-                               FontWeight="Medium" />
+                    <TextBlock Text="↑"
+                               FontSize="14"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
                 </Border>
             </StackPanel>
 
