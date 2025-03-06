@@ -36,13 +36,23 @@
                 IsVisible="{Binding IsNotInstalled}"
                 Background="Red" 
                 CornerRadius="2" 
-                Padding="2,0">
-                <TextBlock 
-                    Text="👎 Missing" 
-                    Foreground="White" 
-                    FontWeight="Bold"
-                    
-                    Padding="4,0" />
+                Padding="2,0"
+                Cursor="Hand">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock 
+                        Text="👎 Missing" 
+                        Foreground="White" 
+                        FontWeight="Bold"
+                        Padding="4,0" />
+                    <Button 
+                        Content="Install" 
+                        Command="{Binding InstallCommand}"
+                        Margin="4,0,0,0"
+                        Foreground="White"
+                        Background="#0366d6"
+                        Cursor="Hand"
+                        Padding="4,0" />
+                </StackPanel>
             </Border>
             
             <!-- Installed State - Green with thumbs up emoji -->

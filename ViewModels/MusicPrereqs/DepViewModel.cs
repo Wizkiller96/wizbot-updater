@@ -2,8 +2,10 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using ReactiveUI;
 using upeko.ViewModels;
+using CommunityToolkit.Mvvm.Input;
 
 namespace upeko.ViewModels
 {
@@ -18,6 +20,11 @@ namespace upeko.ViewModels
         /// Name of the dependency
         /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// Command to install the dependency
+        /// </summary>
+        public IAsyncRelayCommand InstallCommand { get; }
 
         /// <summary>
         /// State of the dependency
@@ -68,6 +75,7 @@ namespace upeko.ViewModels
         public DepViewModel(string name)
         {
             Name = name;
+            InstallCommand = new AsyncRelayCommand(InstallAsync);
             State = DepState.Checking;
         }
 

@@ -77,12 +77,15 @@ namespace upeko.ViewModels
 
                     var ffmpegPath = Path.Combine(Path.GetPathRoot(Environment.SystemDirectory)!, "ffmpeg");
 
+                    if(Directory.Exists(ffmpegPath))
+                        Directory.Delete(ffmpegPath);
+                    
                     Directory.CreateDirectory(ffmpegPath);
                     ZipFile.ExtractToDirectory("./ffmpeg.zip", ffmpegPath);
 
                     Environment.SetEnvironmentVariable("path",
                         Environment.GetEnvironmentVariable("path", EnvironmentVariableTarget.User) + ";" + ffmpegPath +
-                        @"\nightly\bin",
+                        @"\ffmpeg-6.1.1-essentials_build\bin",
                         EnvironmentVariableTarget.User);
                     File.Delete("./ffmpeg.zip");
 
