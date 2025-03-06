@@ -19,10 +19,21 @@
                         Width="64"
                         Height="64"
                         Margin="0,0,20,0"
-                        ClipToBounds="True">
-                    <Image asyncImageLoader:ImageLoader.Source="{Binding Icon}"
-                           Width="64"
-                           Height="64" />
+                        ClipToBounds="True"
+                        Cursor="Hand">
+                    <Panel>
+                        <Image asyncImageLoader:ImageLoader.Source="{Binding Icon}"
+                               Stretch="UniformToFill"
+                               Width="64"
+                               Height="64" />
+                        <Button Background="Transparent"
+                                Width="64"
+                                Height="64"
+                                Padding="0"
+                                BorderThickness="0"
+                                Command="{Binding SelectAvatarCommand}"
+                                ToolTip.Tip="Click to change avatar image" />
+                    </Panel>
                 </Border>
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="4">
                     <TextBlock Text="{Binding Name}"

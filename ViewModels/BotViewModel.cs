@@ -164,6 +164,7 @@ namespace upeko.ViewModels
         public ICommand ToggleRunningCommand { get; }
         public ICommand CheckForUpdatesCommand { get; }
         public ICommand UpdateCommand { get; }
+        public ICommand SelectAvatarCommand { get; }
 
         #endregion
 
@@ -181,6 +182,7 @@ namespace upeko.ViewModels
             UpdateCommand = ReactiveCommand.Create(UpdateButtonClick);
             BackCommand = ReactiveCommand.Create(ExecuteBackCommand);
             SelectBotPathCommand = ReactiveCommand.Create(ExecuteSelectBotPathCommand);
+            SelectAvatarCommand = ReactiveCommand.Create(ExecuteSelectAvatarCommand);
 
 
             UpdateChecker.Instance.OnNewVersionFound += OnNewVersionFound;
@@ -495,7 +497,7 @@ namespace upeko.ViewModels
 
             if (result == null)
                 return;
-            
+
             Bot.Location = result;
         }
 
@@ -563,6 +565,23 @@ namespace upeko.ViewModels
                 // Handle download failure
                 DownloadStatus = $"Download failed: {version}";
                 this.RaisePropertyChanged(nameof(DownloadStatus));
+            }
+        }
+
+        private async void ExecuteSelectAvatarCommand()
+        {
+            var dialogService = new DialogService();
+            var selectedImage = await dialogService.ShowImagePickerAsync("Select Avatar Image");
+
+            if (!string.IsNullOrEmpty(selectedImage))
+            {
+                // Convert local file path to a file:// URI
+                var fileUri = new Uri(selectedImage).ToString();
+                Bot.Icon = fileUri;
+                this.RaisePropertyChanged(nameof(Icon));
+
+                // Save the changes to persist the new icon path
+                Parent?.UpdateBot(Bot);
             }
         }
 
