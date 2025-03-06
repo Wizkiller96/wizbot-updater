@@ -23,7 +23,7 @@
                         Cursor="Hand">
                     <Panel>
                         <asyncImageLoader:AdvancedImage
-                            Source="{Binding Icon}"
+                            Source="{Binding BotIcon}"
                             Loader="{Binding ImageLoader}"
                             Stretch="UniformToFill"
                             Width="64"

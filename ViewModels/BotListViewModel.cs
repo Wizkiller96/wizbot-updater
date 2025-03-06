@@ -1,7 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
-using Avalonia.Media;
+using System.Linq;
 using ReactiveUI;
 using upeko.Models;
 using upeko.Services;
@@ -14,9 +13,9 @@ namespace upeko.ViewModels;
 public class BotListViewModel : ViewModelBase
 {
     private readonly IBotRepository _botRepository;
-    private ObservableCollection<BotItemViewModel?> _items;
+    private ObservableCollection<BotViewModel?> _items;
 
-    public ObservableCollection<BotItemViewModel?> Items
+    public ObservableCollection<BotViewModel?> Items
     {
         get => _items;
         set => this.RaiseAndSetIfChanged(ref _items, value);
@@ -79,8 +78,11 @@ public class BotListViewModel : ViewModelBase
         // Create view models for each bot model
         foreach (var botModel in botModels)
         {
-            var botItemViewModel = new BotItemViewModel(botModel, this);
-            _items.Add(botItemViewModel);
+            var botViewModel = new BotViewModel(this, botModel);
+            _items.Add(botViewModel);
+            
+            // Create a BotItemViewModel that wraps the BotViewModel
+            var botItemViewModel = new BotItemViewModel(botViewModel);
             _allItems.Add(botItemViewModel);
         }
 
@@ -112,18 +114,17 @@ public class BotListViewModel : ViewModelBase
         _botRepository.AddBot(botModel);
 
         // Create a view model from the model
-        var newBot = new BotItemViewModel(botModel, this);
-
-        // Add to the items collection
-        _items.Add(newBot);
-
-        _allItems.Insert(_allItems.Count - 1, newBot);
+        var botViewModel = new BotViewModel(this, botModel);
+        _items.Add(botViewModel);
+        
+        // Create a BotItemViewModel that wraps the BotViewModel
+        var botItemViewModel = new BotItemViewModel(botViewModel);
+        _allItems.Insert(_allItems.Count - 1, botItemViewModel);
     }
 
-    public void OpenBotView(BotItemViewModel botItem)
+    public void OpenBotView(BotViewModel botViewModel)
     {
-        // Create a new BotViewModel and set it as the current page
-        var botViewModel = new BotViewModel(this, botItem);
+        // Set it as the current page
         CurrentPage = botViewModel;
     }
 
@@ -133,183 +134,35 @@ public class BotListViewModel : ViewModelBase
         CurrentPage = this;
     }
 
-    public void UpdateBot(BotItemViewModel botItem)
+    public void UpdateBot(BotModel bot)
     {
         // Update the bot in the repository
-        _botRepository.UpdateBot(botItem.Model);
+        _botRepository.UpdateBot(bot);
     }
 
-    public void RemoveBot(BotItemViewModel botItem)
+    public void RemoveBot(BotViewModel botViewModel)
     {
         // Remove the bot from the repository
-        _botRepository.RemoveBot(botItem.Model);
+        _botRepository.RemoveBot(botViewModel.Bot);
 
         // Remove from the collections
-        _items.Remove(botItem);
-        _allItems.Remove(botItem);
+        _items.Remove(botViewModel);
+        
+        // Find and remove the corresponding BotItemViewModel
+        var itemToRemove = _allItems.OfType<BotItemViewModel>()
+            .FirstOrDefault(x => ReferenceEquals(x.BotViewModel, botViewModel));
+            
+        if (itemToRemove != null)
+        {
+            _allItems.Remove(itemToRemove);
+            
+            // Dispose the item view model to clean up subscriptions
+            if (itemToRemove is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
+        }
 
         CurrentPage = this;
-    }
-}
-
-public class BotItemViewModel : ViewModelBase
-{
-    private readonly BotModel _model;
-    private BotListViewModel _parent;
-    private string _status = "Stopped";
-    private bool _updateAvailable = false;
-
-    public BotModel Model
-        => _model;
-
-    public string Name
-    {
-        get => _model.Name;
-        set
-        {
-            if (_model.Name != value)
-            {
-                _model.Name = value;
-                this.RaisePropertyChanged();
-                _parent.UpdateBot(this);
-            }
-        }
-    }
-
-    public BotListViewModel Parent
-        => _parent;
-
-    public string? Icon
-    {
-        get => _model.IconUri?.ToString() ?? "https://cdn.nadeko.bot/other/av_blurred.png";
-        set
-        {
-            if (Uri.TryCreate(value, UriKind.Absolute, out var uri) && uri != _model.IconUri)
-            {
-                _model.IconUri = uri;
-                this.RaisePropertyChanged();
-                _parent.UpdateBot(this);
-            }
-        }
-    }
-
-    public string? Version
-    {
-        get => _model.Version;
-        set
-        {
-            if (_model.Version != value)
-            {
-                _model.Version = value;
-                this.RaisePropertyChanged();
-                _parent.UpdateBot(this);
-            }
-        }
-    }
-
-    public string? Location
-    {
-        get => _model.PathUri?.LocalPath;
-        set
-        {
-            if (Uri.TryCreate(value, UriKind.Absolute, out var uri)
-                && _model.PathUri != uri)
-            {
-                _model.PathUri = uri;
-                this.RaisePropertyChanged();
-                _parent.UpdateBot(this);
-            }
-        }
-    }
-
-    public string Status
-    {
-        get => _status;
-        set
-        {
-            if (_status != value)
-            {
-                _status = value;
-                this.RaisePropertyChanged();
-                this.RaisePropertyChanged(nameof(StatusColor));
-            }
-        }
-    }
-
-    public IBrush StatusColor
-    {
-        get
-        {
-            return Status switch
-            {
-                "Running" => new SolidColorBrush(Color.Parse("#107C10")), // Green
-                "Stopped" => new SolidColorBrush(Color.Parse("#FFB900")), // Yellow
-                "Error" => new SolidColorBrush(Color.Parse("#D83B01")), // Red
-                "Updating..." => new SolidColorBrush(Color.Parse("#0078D7")), // Blue
-                _ => new SolidColorBrush(Color.Parse("#797775")) // Default gray
-            };
-        }
-    }
-
-    public bool UpdateAvailable
-    {
-        get => _updateAvailable;
-        set
-        {
-            if (_updateAvailable != value)
-            {
-                _updateAvailable = value;
-                this.RaisePropertyChanged();
-            }
-        }
-    }
-
-    public ICommand OpenBotCommand
-        => ReactiveCommand.Create(ExecuteOpenBot);
-
-    public BotItemViewModel(BotModel model, BotListViewModel parent)
-    {
-        _model = model;
-        _parent = parent;
-
-        // Subscribe to model property changes
-        _model.PropertyChanged += (sender, args) =>
-        {
-            // When the model changes, raise property changed for the corresponding property
-            this.RaisePropertyChanged(args.PropertyName);
-        };
-
-        // Check for updates using the UpdateChecker service
-        UpdateAvailable = Services.UpdateChecker.Instance.IsUpdateAvailable(_model.Version);
-
-        // Subscribe to update notifications
-        Services.UpdateChecker.Instance.OnNewVersionFound += (release) =>
-        {
-            // Update the UI to show that a new version is available
-            UpdateAvailable = Services.UpdateChecker.Instance.IsUpdateAvailable(_model.Version);
-        };
-    }
-
-    private void ExecuteOpenBot()
-    {
-        _parent.OpenBotView(this);
-    }
-}
-
-public class AddButtonViewModel : ViewModelBase
-{
-    private readonly BotListViewModel _botListViewModel;
-    public ICommand AddCommand { get; }
-
-    public AddButtonViewModel(BotListViewModel botListViewModel)
-    {
-        _botListViewModel = botListViewModel;
-        AddCommand = ReactiveCommand.Create(ExecuteAdd);
-    }
-
-    private void ExecuteAdd()
-    {
-        // Add a new bot to the items list
-        _botListViewModel.AddNewBot();
     }
 }

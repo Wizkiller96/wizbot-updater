@@ -10,6 +10,7 @@ using System.Linq;
 using System.Windows.Input;
 using Avalonia.Controls;
 using AsyncImageLoader;
+using upeko.Models;
 
 namespace upeko.ViewModels
 {
@@ -20,13 +21,47 @@ namespace upeko.ViewModels
     {
         #region Properties
 
-        private BotItemViewModel _bot;
+        private BotModel _bot;
 
-        public BotItemViewModel Bot
+        public BotModel Bot
+            => _bot;
+
+        public string? BotIcon
         {
-            get => _bot;
-            set => this.RaiseAndSetIfChanged(ref _bot, value);
+            get => _bot.IconUri?.ToString();
+            set
+            {
+                if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
+                {
+                    _bot.IconUri = uri;
+                    Parent.UpdateBot(_bot);
+
+                    this.RaisePropertyChanged();
+                }
+            }
         }
+
+        public string BotPath
+        {
+            get => Bot.PathUri?.LocalPath ?? string.Empty;
+            set
+            {
+                if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
+                {
+                    _bot.PathUri = uri;
+                    Parent.UpdateBot(_bot);
+
+                    this.RaisePropertyChanged();
+                    this.RaisePropertyChanged(nameof(ExecutablePath));
+                }
+            }
+        }
+
+        public string Name
+            => Bot.Name;
+
+        public string ExecutablePath
+            => Path.Combine(BotPath, PlatformSpecific.GetExecutableName());
 
         private ReleaseModel _latestRelease;
 
@@ -41,7 +76,16 @@ namespace upeko.ViewModels
         public MainActivityState State
         {
             get => _state;
-            set => this.RaiseAndSetIfChanged(ref _state, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _state, value);
+                this.RaisePropertyChanged(nameof(IsRunning));
+                this.RaisePropertyChanged(nameof(IsBotDownloaded));
+                this.RaisePropertyChanged(nameof(IsNotDownloading));
+                this.RaisePropertyChanged(nameof(IsDownloading));
+                this.RaisePropertyChanged(nameof(UpdateButtonText));
+                this.RaisePropertyChanged(nameof(IsUpdateAvailable));
+            }
         }
 
         public BotListViewModel Parent { get; }
@@ -50,9 +94,6 @@ namespace upeko.ViewModels
 
         public bool IsRunning
             => _process != null;
-
-        public string ExecutablePath
-            => Path.Combine(Bot.Location ?? string.Empty, PlatformSpecific.GetExecutableName());
 
         public bool IsUpdateAvailable
             => UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
@@ -68,7 +109,11 @@ namespace upeko.ViewModels
         public bool IsDownloading
         {
             get => _isDownloading;
-            set => this.RaiseAndSetIfChanged(ref _isDownloading, value);
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _isDownloading, value);
+                this.RaisePropertyChanged(nameof(IsNotDownloading));
+            }
         }
 
         public bool IsNotDownloading
@@ -119,14 +164,6 @@ namespace upeko.ViewModels
                 ? new SolidColorBrush(Color.Parse("#E74C3C")) // Red for stop
                 : new SolidColorBrush(Color.Parse("#2ECC71")); // Green for start
 
-        public string BotPath
-            => Bot?.Location ?? string.Empty;
-
-        public string Name
-            => Bot?.Name ?? string.Empty;
-
-        public string Icon
-            => Bot?.Icon ?? string.Empty;
 
         public string Status
             => State switch
@@ -176,8 +213,8 @@ namespace upeko.ViewModels
         public BotViewModel()
         {
             ImageLoader = App.Services.GetService(typeof(IAsyncImageLoader)) as IAsyncImageLoader
-                               ?? throw new InvalidOperationException("Failed to resolve IImageLoaderService");
-            
+                          ?? throw new InvalidOperationException("Failed to resolve IImageLoaderService");
+
             DeleteIntentCommand = ReactiveCommand.Create(ExecuteDeleteIntentCommand);
             DeleteBotCommand = ReactiveCommand.Create(ExecuteDeleteBotCommand);
             DeleteCancelCommand = ReactiveCommand.Create(ExecuteDeleteCancelCommand);
@@ -196,7 +233,7 @@ namespace upeko.ViewModels
             UpdateChecker.Instance.OnDownloadComplete += OnDownloadComplete;
         }
 
-        public BotViewModel(BotListViewModel parent, BotItemViewModel model) : this()
+        public BotViewModel(BotListViewModel parent, BotModel model) : this()
         {
             _bot = model;
             Parent = parent;
@@ -213,7 +250,7 @@ namespace upeko.ViewModels
         /// </summary>
         public void ReloadVersionFromPath()
         {
-            if (Bot.Location == null)
+            if (string.IsNullOrWhiteSpace(BotPath))
                 return;
 
             if (!File.Exists(ExecutablePath))
@@ -244,9 +281,6 @@ namespace upeko.ViewModels
                 return;
             }
 
-            this.RaisePropertyChanged(nameof(IsBotDownloaded));
-            this.RaisePropertyChanged(nameof(IsUpdateAvailable));
-            this.RaisePropertyChanged(nameof(UpdateButtonText));
             UpdateCurrentActivity();
         }
 
@@ -271,8 +305,6 @@ namespace upeko.ViewModels
         private void OnNewVersionFound(ReleaseModel newVer)
         {
             LatestReleaseModel = newVer;
-            this.RaisePropertyChanged(nameof(IsUpdateAvailable));
-            this.RaisePropertyChanged(nameof(UpdateButtonText));
             UpdateCurrentActivity();
         }
 
@@ -288,13 +320,10 @@ namespace upeko.ViewModels
                 DownloadProgress = 0;
                 DownloadStatus = "Preparing to download...";
 
-                // Ensure UI updates
-                this.RaisePropertyChanged(nameof(IsNotDownloading));
-
                 // Start the download
                 await UpdateChecker.Instance.DownloadAndInstallBotAsync(
                     Bot.Name,
-                    Bot.Location
+                    BotPath
                 );
 
                 IsDownloading = false;
@@ -309,9 +338,6 @@ namespace upeko.ViewModels
                 IsDownloading = false;
                 DownloadStatus = $"Error: {ex.Message}";
 
-                // Ensure UI updates
-                this.RaisePropertyChanged(nameof(IsNotDownloading));
-
                 // Log the exception
                 Console.WriteLine($"Error downloading installer: {ex}");
             }
@@ -323,10 +349,10 @@ namespace upeko.ViewModels
         /// <param name="wipe">Whether to wipe the folder from the disk too.</param>
         public void Delete(bool wipe)
         {
-            if (Bot.Location == null)
+            if (string.IsNullOrWhiteSpace(BotPath))
                 return;
 
-            Parent.RemoveBot(Bot);
+            Parent.RemoveBot(this);
         }
 
         /// <summary>
@@ -376,7 +402,7 @@ namespace upeko.ViewModels
             _process = Process.Start(new ProcessStartInfo
             {
                 FileName = ExecutablePath,
-                WorkingDirectory = BotPath
+                WorkingDirectory = BotPath,
             });
 
             var p = _process;
@@ -387,7 +413,6 @@ namespace upeko.ViewModels
                 Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
                 {
                     _process = null;
-                    this.RaisePropertyChanged(nameof(IsRunning));
                     UpdateCurrentActivity();
                 });
 
@@ -459,11 +484,11 @@ namespace upeko.ViewModels
 
         private void OpenCredsClick()
         {
-            if (Bot.Location == null)
+            if (string.IsNullOrWhiteSpace(BotPath))
                 return;
 
-            var credsFile = Path.Combine(Bot.Location, "data", "creds.yml");
-            var credsExampleFile = Path.Combine(Bot.Location, "data", "creds_example.yml");
+            var credsFile = Path.Combine(BotPath, "data", "creds.yml");
+            var credsExampleFile = Path.Combine(BotPath, "data", "creds_example.yml");
             if (!File.Exists(credsFile))
             {
                 if (!File.Exists(credsExampleFile))
@@ -479,10 +504,10 @@ namespace upeko.ViewModels
 
         private void OpenDataClick()
         {
-            if (Bot.Location == null)
+            if (string.IsNullOrWhiteSpace(BotPath))
                 return;
 
-            var dataFolder = Path.Combine(Bot.Location, "data");
+            var dataFolder = Path.Combine(BotPath, "data");
             if (!Directory.Exists(dataFolder))
             {
                 return;
@@ -500,7 +525,7 @@ namespace upeko.ViewModels
         {
             var dialog = new OpenFolderDialog()
             {
-                Directory = Bot.Location ?? string.Empty
+                Directory = BotPath
             };
 
             var result = await dialog.ShowAsync(App.MainWindow);
@@ -508,7 +533,7 @@ namespace upeko.ViewModels
             if (result == null)
                 return;
 
-            Bot.Location = result;
+            BotPath = result;
         }
 
         private void ExecuteDeleteIntentCommand()
@@ -553,17 +578,11 @@ namespace upeko.ViewModels
             DownloadProgress = progress;
             DownloadStatus = status;
             IsDownloading = true;
-
-            // Update UI properties
-            this.RaisePropertyChanged(nameof(IsNotDownloading));
         }
 
         private void OnDownloadComplete(bool success, string version)
         {
             IsDownloading = false;
-
-            // Update UI properties
-            this.RaisePropertyChanged(nameof(IsNotDownloading));
 
             if (success)
             {
@@ -574,7 +593,6 @@ namespace upeko.ViewModels
             {
                 // Handle download failure
                 DownloadStatus = $"Download failed: {version}";
-                this.RaisePropertyChanged(nameof(DownloadStatus));
             }
         }
 
@@ -587,8 +605,7 @@ namespace upeko.ViewModels
             {
                 // Convert local file path to a file:// URI
                 var fileUri = new Uri(selectedImage).ToString();
-                Bot.Icon = fileUri;
-                this.RaisePropertyChanged(nameof(Icon));
+                BotIcon = fileUri;
 
                 // Save the changes to persist the new icon path
                 Parent?.UpdateBot(Bot);
