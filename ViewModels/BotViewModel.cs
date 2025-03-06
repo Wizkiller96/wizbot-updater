@@ -216,18 +216,22 @@ namespace upeko.ViewModels
 
             try
             {
+                Debug.WriteLine(ExecutablePath);
                 using var p = Process.Start(new ProcessStartInfo()
                 {
                     FileName = ExecutablePath,
                     Arguments = "--version",
-                    UseShellExecute = false
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
                 });
 
                 var info = p.StandardOutput.ReadToEnd();
                 Bot.Version = info.Trim();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                Debug.WriteLine(ex.Message);
                 Bot.Version = null;
                 return;
             }
@@ -357,12 +361,10 @@ namespace upeko.ViewModels
                 throw new InvalidOperationException("Executable path is invalid or does not exist.");
             }
 
-            var workDir = Path.GetFullPath(ExecutablePath);
-
             _process = Process.Start(new ProcessStartInfo
             {
                 FileName = ExecutablePath,
-                WorkingDirectory = workDir
+                WorkingDirectory = BotPath
             });
 
             var p = _process;
