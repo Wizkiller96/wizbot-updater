@@ -1,4 +1,4 @@
-# <img src="assets/upeko.ico" alt="Upeko Logo" width="32"> Upeko - NadekoBot Installer <img src="assets/upeko.ico" alt="Upeko Logo" width="32">
+# Upeko - NadekoBot Installer
 
 Cross-platform created to simplify the installation of NadekoBot(s).
 Built with .NET 8 and Avalonia UI.
