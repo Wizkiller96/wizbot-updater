@@ -234,16 +234,31 @@
                                     Width="16" Height="16" />
                             </Button>
                         </StackPanel>
-                        <Button Command="{Binding ToggleRunningCommand}"
+                        <!-- Start Button -->
+                        <Button Command="{Binding StartCommand}"
                                 IsEnabled="{Binding IsBotDownloaded}"
-                                Background="{Binding RunButtonBackground}"
+                                IsVisible="{Binding CanStart}"
+                                Background="{DynamicResource SystemAccentColor}"
                                 BorderThickness="0"
                                 Padding="15,10"
                                 CornerRadius="4"
                                 Width="120">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <PathIcon Data="{Binding RunButtonIcon}" Width="16" Height="16" />
-                                <TextBlock Text="{Binding RunButtonText}" />
+                                <PathIcon Data="M8,5.14V19.14L19,12.14L8,5.14Z" Width="16" Height="16" />
+                                <TextBlock Text="Start" />
+                            </StackPanel>
+                        </Button>
+                        <!-- Stop Button -->
+                        <Button Command="{Binding StopCommand}"
+                                IsVisible="{Binding CanStop}"
+                                Background="#E74C3C"
+                                BorderThickness="0"
+                                Padding="15,10"
+                                CornerRadius="4"
+                                Width="120">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <PathIcon Data="M14,19H18V5H14M6,19H10V5H6V19Z" Width="16" Height="16" />
+                                <TextBlock Text="Stop" />
                             </StackPanel>
                         </Button>
                     </StackPanel>

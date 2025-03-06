@@ -29,6 +29,11 @@ public class BotItemViewModel : ViewModelBase, IDisposable
     public string? Version => BotViewModel.Version;
 
     /// <summary>
+    /// Gets whether the bot has a version (is downloaded)
+    /// </summary>
+    public bool HasVersion => !string.IsNullOrWhiteSpace(Version);
+
+    /// <summary>
     /// Gets the bot's location on disk
     /// </summary>
     public string? Location => BotViewModel.BotPath;
@@ -84,6 +89,7 @@ public class BotItemViewModel : ViewModelBase, IDisposable
         this.RaisePropertyChanged(nameof(Name));
         this.RaisePropertyChanged(nameof(StatusColor));
         this.RaisePropertyChanged(nameof(UpdateAvailable));
+        this.RaisePropertyChanged(nameof(HasVersion));
     }
 
     private void ExecuteOpenBot()

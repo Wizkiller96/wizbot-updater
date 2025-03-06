@@ -23,7 +23,8 @@
                     BorderThickness="1"
                     CornerRadius="4"
                     Padding="2"
-                    BorderBrush="DimGray">
+                    BorderBrush="DimGray"
+                    IsVisible="{Binding HasVersion}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Text="v"
                                    FontSize="13"
@@ -38,14 +39,12 @@
                 <Border IsVisible="{Binding UpdateAvailable}"
                         Background="{DynamicResource SystemAccentColor}"
                         CornerRadius="4"
+                        Padding="3"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Top">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Update!"
-                                   FontSize="10"
-                                   Padding="2"
-                                   FontWeight="Medium" />
-                    </StackPanel>
+                    <TextBlock Text="Update!"
+                               FontSize="10"
+                               FontWeight="Medium" />
                 </Border>
             </StackPanel>
 

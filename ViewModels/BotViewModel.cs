@@ -85,6 +85,8 @@ namespace upeko.ViewModels
                 this.RaisePropertyChanged(nameof(IsDownloading));
                 this.RaisePropertyChanged(nameof(UpdateButtonText));
                 this.RaisePropertyChanged(nameof(IsUpdateAvailable));
+                this.RaisePropertyChanged(nameof(CanStart));
+                this.RaisePropertyChanged(nameof(CanStop));
             }
         }
 
@@ -94,6 +96,12 @@ namespace upeko.ViewModels
 
         public bool IsRunning
             => _process != null;
+
+        public bool CanStart
+            => !IsRunning && (State == MainActivityState.Runnable || State == MainActivityState.Updatable);
+
+        public bool CanStop
+            => IsRunning && State == MainActivityState.Running;
 
         public bool IsUpdateAvailable
             => UpdateChecker.Instance.IsUpdateAvailable(Bot?.Version);
@@ -201,7 +209,8 @@ namespace upeko.ViewModels
         public ICommand DeleteCancelCommand { get; }
         public ICommand OpenDataFolderCommand { get; }
         public ICommand OpenCredsFileCommand { get; }
-        public ICommand ToggleRunningCommand { get; }
+        public ICommand StartCommand { get; }
+        public ICommand StopCommand { get; }
         public ICommand CheckForUpdatesCommand { get; }
         public ICommand UpdateCommand { get; }
         public ICommand SelectAvatarCommand { get; }
@@ -220,7 +229,8 @@ namespace upeko.ViewModels
             DeleteCancelCommand = ReactiveCommand.Create(ExecuteDeleteCancelCommand);
             OpenDataFolderCommand = ReactiveCommand.Create(OpenDataClick);
             OpenCredsFileCommand = ReactiveCommand.Create(OpenCredsClick);
-            ToggleRunningCommand = ReactiveCommand.Create(MainButtonClick);
+            StartCommand = ReactiveCommand.Create(ExecuteStartCommand);
+            StopCommand = ReactiveCommand.Create(ExecuteStopCommand);
             CheckForUpdatesCommand = ReactiveCommand.Create(ExecuteCheckForUpdatesCommand);
             UpdateCommand = ReactiveCommand.Create(UpdateButtonClick);
             BackCommand = ReactiveCommand.Create(ExecuteBackCommand);
@@ -461,18 +471,14 @@ namespace upeko.ViewModels
             }
         }
 
-        private void MainButtonClick()
+        private void ExecuteStartCommand()
         {
-            switch (State)
-            {
-                case MainActivityState.Running:
-                    Stop();
-                    break;
-                case MainActivityState.Runnable:
-                case MainActivityState.Updatable:
-                    Run();
-                    break;
-            }
+            Run();
+        }
+
+        private void ExecuteStopCommand()
+        {
+            Stop();
         }
 
         private async Task OnUpdateButtonClick(object sender, RoutedEventArgs e)
