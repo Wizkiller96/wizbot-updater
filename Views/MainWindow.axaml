@@ -20,13 +20,23 @@
         <vm:MainWindowViewModel />
     </Design.DataContext>
 
-    <StackPanel>
-        <StackPanel Orientation="Horizontal"
-                    HorizontalAlignment="Center"
-                    Spacing="5">
-            <views:FfmpegButtonView DataContext="{Binding FfmpegViewModel}" />
-            <views:YtDlpButtonView DataContext="{Binding YtDlpViewModel}" />
+    <Grid>
+        <StackPanel>
+            <Grid Margin="5, 2">
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            Spacing="2">
+                    <views:FfmpegButtonView DataContext="{Binding FfmpegViewModel}" />
+                    <views:YtDlpButtonView DataContext="{Binding YtDlpViewModel}" />
+                </StackPanel>
+                <Button HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding OpenChangelogCommand}"
+                        ToolTip.Tip="Open Changelog">
+                    changelog
+                </Button>
+            </Grid>
+            <views:BotListView DataContext="{Binding Bots}" />
         </StackPanel>
-        <views:BotListView DataContext="{Binding Bots}" />
-    </StackPanel>
+    </Grid>
 </Window>

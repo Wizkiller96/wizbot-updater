@@ -297,6 +297,10 @@ namespace upeko.ViewModels
                     Bot.Location
                 );
 
+                IsDownloading = false;
+                ReloadVersionFromPath();
+                UpdateCurrentActivity();
+
                 // Success will be handled by the OnDownloadComplete handler
             }
             catch (Exception ex)

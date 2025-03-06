@@ -25,8 +25,7 @@
                 CornerRadius="2" 
                 Padding="2,0">
                 <TextBlock 
-                    Text="🔄 Checking" 
-                    Foreground="White" 
+                    Text="🔄" 
                     FontWeight="Bold" 
                     Padding="4,0" />
             </Border>
@@ -40,8 +39,7 @@
                 Cursor="Hand">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock 
-                        Text="👎 Missing" 
-                        Foreground="White" 
+                        Text="👎" 
                         FontWeight="Bold"
                         Padding="4,0" />
                     <Button 
@@ -62,8 +60,7 @@
                 CornerRadius="2" 
                 Padding="2,0">
                 <TextBlock 
-                    Text="👍 Installed" 
-                    Foreground="White" 
+                    Text="👍" 
                     FontWeight="Bold" 
                     Padding="4,0" />
             </Border>

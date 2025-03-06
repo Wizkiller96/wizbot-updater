@@ -17,6 +17,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly FfmpegDepViewModel _ffmpegViewModel;
     private readonly YtdlDepViewModel _ytdlpViewModel;
     private readonly IAsyncImageLoader _imageLoaderService;
+    private const string ChangelogUrl = "https://github.com/nadeko-bot/nadekobot/blob/v6/CHANGELOG.md";
 
     public BotListViewModel Bots { get; } = new();
 
@@ -32,6 +33,8 @@ public partial class MainWindowViewModel : ViewModelBase
     
     public IAsyncImageLoader ImageLoader => _imageLoaderService;
 
+    public ICommand OpenChangelogCommand { get; }
+
     public MainWindowViewModel()
     {
         // Get the ImageLoaderService from the dependency injection container
@@ -41,6 +44,9 @@ public partial class MainWindowViewModel : ViewModelBase
         // Initialize view models
         _ffmpegViewModel = new FfmpegDepViewModel();
         _ytdlpViewModel = new YtdlDepViewModel();
+
+        // Initialize commands
+        OpenChangelogCommand = ReactiveCommand.Create(OpenChangelog);
 
         // Run the check methods for ffmpeg and ytdlp view models when the app starts
         // Use Dispatcher to ensure UI updates happen on the UI thread
@@ -53,5 +59,16 @@ public partial class MainWindowViewModel : ViewModelBase
             await _ffmpegViewModel.CheckAsync();
             await _ytdlpViewModel.CheckAsync();
         });
+    }
+
+    private void OpenChangelog()
+    {
+        var psi = new ProcessStartInfo
+        {
+            FileName = ChangelogUrl,
+            UseShellExecute = true
+        };
+        
+        Process.Start(psi);
     }
 }
