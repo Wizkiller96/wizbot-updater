@@ -20,7 +20,6 @@ namespace upeko.Services
 
         private readonly string _legacyBotsJsonPath;
 
-        private readonly string _appDirectory;
         private readonly string _configFilePath;
         private readonly string _myDocumentsFolder;
 
@@ -28,12 +27,12 @@ namespace upeko.Services
 
         public JsonBotRepository()
         {
+            _myDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            
             // Get the application directory
-            _appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            _configFilePath = Path.Combine(_appDirectory, "upeko.json");
+            _configFilePath = Path.Combine(_myDocumentsFolder, "upeko.json");
 
             // Get the MyDocuments folder path
-            _myDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             var updaterFolder = Path.Combine(_myDocumentsFolder, "NadekoBotUpdater");
             _legacyBotsJsonPath = Path.Combine(updaterFolder, "bots.json");
 
@@ -136,8 +135,8 @@ namespace upeko.Services
             try
             {
                 // Ensure the directory exists
-                var directory = Path.GetDirectoryName(_configFilePath);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                var directory = Path.GetDirectoryName(_configFilePath)!;
+                if (!Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
