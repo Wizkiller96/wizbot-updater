@@ -78,11 +78,19 @@ namespace upeko.ViewModels
                     Directory.CreateDirectory(ffmpegPath);
                     ZipFile.ExtractToDirectory("./ffmpeg.zip", ffmpegPath);
 
-                    Environment.SetEnvironmentVariable("path",
-                        Environment.GetEnvironmentVariable("path", EnvironmentVariableTarget.User) + ";" + ffmpegPath +
-                        @"\ffmpeg-6.1.1-essentials_build\bin",
-                        EnvironmentVariableTarget.User);
-                    File.Delete("./ffmpeg.zip");
+                    try
+                    {
+                        Environment.SetEnvironmentVariable("path",
+                            Environment.GetEnvironmentVariable("path", EnvironmentVariableTarget.User) + ";" +
+                            ffmpegPath +
+                            @"\ffmpeg-6.1.1-essentials_build\bin",
+                            EnvironmentVariableTarget.User);
+                        File.Delete("./ffmpeg.zip");
+                    }
+                    catch
+                    {
+                        
+                    }
 
                     return true;
                 }

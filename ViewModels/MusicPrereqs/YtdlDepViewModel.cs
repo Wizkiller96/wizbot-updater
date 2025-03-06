@@ -70,10 +70,17 @@ namespace upeko.ViewModels
                     await using var stream = await http.GetStreamAsync(winDlLink);
                     await using var fs = new FileStream(Path.Combine(ytdlPath, "yt-dlp.exe"), FileMode.Create);
 
-                    await stream.CopyToAsync(fs);
-                    Environment.SetEnvironmentVariable("path",
-                        Environment.GetEnvironmentVariable("path") + ";" + ytdlPath,
-                        EnvironmentVariableTarget.User);
+                    try
+                    {
+                        await stream.CopyToAsync(fs);
+                        Environment.SetEnvironmentVariable("path",
+                            Environment.GetEnvironmentVariable("path") + ";" + ytdlPath,
+                            EnvironmentVariableTarget.User);
+                    }
+                    catch
+                    {
+                    }
+
                     return true;
                 }
                 else
