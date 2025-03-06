@@ -82,18 +82,33 @@
                                             Margin="0,0,6,4"
                                             CornerRadius="4"
                                             Width="120">
+                                    </Border>
+                                    <Border Grid.Row="0" Grid.Column="1"
+                                            Padding="12,8"
+                                            Margin="0,0,0,4"
+                                            CornerRadius="4">
+                                        <TextBlock Text="{Binding Bot.Guid}" 
+                                                   FontFamily="Consolas, Menlo, Monaco, 'Courier New', monospace" 
+                                                   FontSize="10" 
+                                                   TextWrapping="Wrap" />
+                                    </Border>
+                                    <Border Grid.Row="1" Grid.Column="0"
+                                            Padding="2,4"
+                                            Margin="0,0,6,4"
+                                            CornerRadius="4"
+                                            Width="120">
                                         <TextBlock Text="Version"
                                                    FontWeight="SemiBold"
                                                    HorizontalAlignment="Left" />
                                     </Border>
-                                    <Border Grid.Row="0" Grid.Column="1"
+                                    <Border Grid.Row="1" Grid.Column="1"
                                             Padding="12,8"
                                             Margin="0,0,0,4"
                                             CornerRadius="4">
                                         <TextBlock Text="{Binding Version}" />
                                     </Border>
 
-                                    <Border Grid.Row="1" Grid.Column="0"
+                                    <Border Grid.Row="2" Grid.Column="0"
                                             Padding="2,4"
                                             Margin="0,0,6,4"
                                             CornerRadius="4"
@@ -102,20 +117,20 @@
                                                    FontWeight="SemiBold"
                                                    HorizontalAlignment="Left" />
                                     </Border>
-                                    <Border Grid.Row="1" Grid.Column="1"
-                                            Padding="12,8"
-                                            Margin="0,0,0,4"
+                                    <Border Grid.Row="2" Grid.Column="1"
                                             BorderThickness="1"
                                             BorderBrush="{DynamicResource SystemControlBackgroundBaseMediumBrush}"
                                             CornerRadius="4">
                                         <TextBlock Text="{Binding BotPath}"
+                                                   VerticalAlignment="Center"
+                                                   Padding="2, 0"
                                                    FontSize="10"
                                                    TextWrapping="Wrap" />
                                     </Border>
 
-                                    <Border Grid.Row="1" Grid.Column="2"
+                                    <Border Grid.Row="2" Grid.Column="2"
                                             Padding="4,4"
-                                            Margin="8,0,0,4"
+                                            Margin="2"
                                             CornerRadius="4">
                                         <Button Command="{Binding SelectBotPathCommand}"
                                                 ToolTip.Tip="Select Bot Location">
