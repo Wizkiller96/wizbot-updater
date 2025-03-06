@@ -19,7 +19,7 @@ public class BotItemViewModel : ViewModelBase, IDisposable
     /// <summary>
     /// Gets the bot icon URL
     /// </summary>
-    public string? Icon => BotViewModel.BotIcon ?? "https://cdn.nadeko.bot/other/av_blurred.png";
+    public string Icon => BotViewModel.BotIcon;
 
     /// <summary>
     /// Gets the bot version

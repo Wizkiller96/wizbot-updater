@@ -27,9 +27,9 @@ namespace upeko.ViewModels
 
         public BotListViewModel Parent { get; } = null!;
 
-        public string? BotIcon
+        public string BotIcon
         {
-            get => _bot.IconUri?.ToString();
+            get => _bot.IconUri?.ToString() ?? "https://cdn.nadeko.bot/other/av_blurred.png";
             set
             {
                 if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
