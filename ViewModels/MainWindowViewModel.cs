@@ -2,6 +2,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using System.Windows.Input;
+using Avalonia;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using ReactiveUI;
 using upeko.Views;
@@ -9,6 +11,7 @@ using System.Threading.Tasks;
 using AsyncImageLoader.Loaders;
 using upeko.Services;
 using AsyncImageLoader;
+using System;
 
 namespace upeko.ViewModels;
 
@@ -18,6 +21,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private readonly YtdlDepViewModel _ytdlpViewModel;
     private readonly IAsyncImageLoader _imageLoaderService;
     private const string ChangelogUrl = "https://github.com/nadeko-bot/nadekobot/blob/v6/CHANGELOG.md";
+    private bool _isDarkTheme;
 
     public BotListViewModel Bots { get; } = new();
 
@@ -34,6 +38,15 @@ public partial class MainWindowViewModel : ViewModelBase
     public IAsyncImageLoader ImageLoader => _imageLoaderService;
 
     public ICommand OpenChangelogCommand { get; }
+    public ICommand ToggleThemeCommand { get; }
+
+    public bool IsDarkTheme
+    {
+        get => _isDarkTheme;
+        set => this.RaiseAndSetIfChanged(ref _isDarkTheme, value);
+    }
+
+    public string ThemeButtonText => IsDarkTheme ? "Light Theme" : "Dark Theme";
 
     public MainWindowViewModel()
     {
@@ -45,8 +58,12 @@ public partial class MainWindowViewModel : ViewModelBase
         _ffmpegViewModel = new FfmpegDepViewModel();
         _ytdlpViewModel = new YtdlDepViewModel();
 
+        // Initialize the theme state (default to light theme)
+        _isDarkTheme = Application.Current!.RequestedThemeVariant == ThemeVariant.Dark;
+
         // Initialize commands
         OpenChangelogCommand = ReactiveCommand.Create(OpenChangelog);
+        ToggleThemeCommand = ReactiveCommand.Create(ToggleTheme);
 
         // Run the check methods for ffmpeg and ytdlp view models when the app starts
         // Use Dispatcher to ensure UI updates happen on the UI thread
@@ -59,6 +76,10 @@ public partial class MainWindowViewModel : ViewModelBase
             await _ffmpegViewModel.CheckAsync();
             await _ytdlpViewModel.CheckAsync();
         });
+
+        // Set up property changed notification for ThemeButtonText when IsDarkTheme changes
+        this.WhenAnyValue(x => x.IsDarkTheme)
+            .Subscribe(darkTheme => this.RaisePropertyChanged(nameof(ThemeButtonText)));
     }
 
     private void OpenChangelog()
@@ -70,5 +91,15 @@ public partial class MainWindowViewModel : ViewModelBase
         };
         
         Process.Start(psi);
+    }
+
+    private void ToggleTheme()
+    {
+        // Toggle the theme state
+        IsDarkTheme = !IsDarkTheme;
+
+        // Apply the theme change at the application level
+        var newTheme = IsDarkTheme ? ThemeVariant.Dark : ThemeVariant.Light;
+        Application.Current!.RequestedThemeVariant = newTheme;
     }
 }

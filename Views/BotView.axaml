@@ -10,7 +10,7 @@
     <Grid RowDefinitions="Auto,*,Auto">
         <!-- Header -->
         <Border Grid.Row="0"
-                BorderBrush="#E1E1E1"
+                BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}"
                 BorderThickness="0,0,0,1"
                 Padding="20">
             <Grid ColumnDefinitions="Auto,*,Auto">
@@ -55,7 +55,7 @@
                 </StackPanel>
                 <Button Grid.Column="2"
                         Command="{Binding BackCommand}"
-                        BorderBrush="#E1E1E1"
+                        BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}"
                         BorderThickness="1"
                         CornerRadius="4"
                         Padding="12,8">
@@ -84,7 +84,7 @@
                                             Width="120">
                                         <TextBlock Text="Version"
                                                    FontWeight="SemiBold"
-                                                   HorizontalAlignment="Center" />
+                                                   HorizontalAlignment="Left" />
                                     </Border>
                                     <Border Grid.Row="0" Grid.Column="1"
                                             Padding="12,8"
@@ -94,19 +94,19 @@
                                     </Border>
 
                                     <Border Grid.Row="1" Grid.Column="0"
-                                            Padding="10,8"
+                                            Padding="2,4"
                                             Margin="0,0,6,4"
                                             CornerRadius="4"
                                             Width="120">
                                         <TextBlock Text="Location"
                                                    FontWeight="SemiBold"
-                                                   HorizontalAlignment="Center" />
+                                                   HorizontalAlignment="Left" />
                                     </Border>
                                     <Border Grid.Row="1" Grid.Column="1"
                                             Padding="12,8"
                                             Margin="0,0,0,4"
                                             BorderThickness="1"
-                                            BorderBrush="DimGray"
+                                            BorderBrush="{DynamicResource SystemControlBackgroundBaseMediumBrush}"
                                             CornerRadius="4">
                                         <TextBlock Text="{Binding BotPath}"
                                                    FontSize="10"
@@ -136,7 +136,7 @@
                                 <Border
                                     CornerRadius="4"
                                     Padding="12"
-                                    BorderBrush="#E1E1E1"
+                                    BorderBrush="{DynamicResource SystemControlBackgroundBaseLowBrush}"
                                     BorderThickness="1">
                                     <StackPanel Spacing="8">
                                         <Button x:Name="DeleteBotButton" Content="Delete Bot"
@@ -147,7 +147,7 @@
                                                     IsVisible="{Binding DeleteConfirm}">
                                             <Border
                                                 BorderThickness="1"
-                                                BorderBrush="Crimson"
+                                                BorderBrush="{DynamicResource SystemErrorTextColor}"
                                                 Padding="4">
                                                 <TextBlock
                                                     TextWrapping="Wrap"
@@ -169,16 +169,6 @@
                     </Border>
                 </ScrollViewer>
             </TabItem>
-            <TabItem Header="Console">
-                <Border Padding="12">
-                    <ScrollViewer>
-                        <TextBlock Text="{Binding ConsoleOutput}"
-                                   FontFamily="Consolas, Menlo, Monaco, 'Courier New', monospace"
-                                   FontSize="14"
-                                   TextWrapping="Wrap" />
-                    </ScrollViewer>
-                </Border>
-            </TabItem>
         </TabControl>
 
         <!-- Footer -->
@@ -199,6 +189,7 @@
                                      Minimum="0"
                                      Maximum="1"
                                      Height="8"
+                                     Foreground="{DynamicResource NotificationCardSuccessBackgroundBrush}"
                                      CornerRadius="4" />
                         <TextBlock Text="Please wait while the bot is being downloaded and installed..."
                                    HorizontalAlignment="Center"
@@ -238,26 +229,29 @@
                         <Button Command="{Binding StartCommand}"
                                 IsEnabled="{Binding IsBotDownloaded}"
                                 IsVisible="{Binding CanStart}"
-                                Background="{DynamicResource SystemAccentColor}"
-                                BorderThickness="0"
+                                BorderBrush="{DynamicResource NotificationCardSuccessBackgroundBrush}"
+                                BorderThickness="1"
                                 Padding="15,10"
                                 CornerRadius="4"
                                 Width="120">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <PathIcon Data="M8,5.14V19.14L19,12.14L8,5.14Z" Width="16" Height="16" />
+                                <PathIcon Data="M8,5.14V19.14L19,12.14L8,5.14Z" Width="16" Height="16"
+                                          Foreground="{DynamicResource NotificationCardSuccessBackgroundBrush}"
+                                          />
                                 <TextBlock Text="Start" />
                             </StackPanel>
                         </Button>
                         <!-- Stop Button -->
                         <Button Command="{Binding StopCommand}"
                                 IsVisible="{Binding CanStop}"
-                                Background="#E74C3C"
-                                BorderThickness="0"
+                                BorderBrush="{DynamicResource SystemErrorTextColor}"
+                                BorderThickness="1"
                                 Padding="15,10"
                                 CornerRadius="4"
                                 Width="120">
                             <StackPanel Orientation="Horizontal" Spacing="8">
-                                <PathIcon Data="M14,19H18V5H14M6,19H10V5H6V19Z" Width="16" Height="16" />
+                                <PathIcon Data="M14,19H18V5H14M6,19H10V5H6V19Z" Width="16" Height="16"
+                                          Foreground="{DynamicResource SystemErrorTextColor}"/>
                                 <TextBlock Text="Stop" />
                             </StackPanel>
                         </Button>
@@ -271,6 +265,7 @@
                             IsVisible="{Binding IsNotDownloading}">
                     <Button Command="{Binding CheckForUpdatesCommand}"
                             IsEnabled="{Binding CanCheckForUpdates}"
+                            BorderBrush="{DynamicResource SystemControlBackgroundBaseMediumBrush}"
                             BorderThickness="1"
                             Padding="8, 6"
                             CornerRadius="4"
@@ -284,6 +279,7 @@
                     </Button>
                     <Button Command="{Binding UpdateCommand}"
                             IsEnabled="{Binding IsUpdateAvailable}"
+                            BorderBrush="{DynamicResource SystemControlBackgroundBaseMediumBrush}"
                             BorderThickness="1"
                             Padding="8, 6"
                             CornerRadius="4">
