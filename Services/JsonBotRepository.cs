@@ -21,19 +21,18 @@ namespace upeko.Services
         private readonly string _legacyBotsJsonPath;
 
         private readonly string _configFilePath;
-        private readonly string _myDocumentsFolder;
 
         private ConfigModel _config = new();
 
         public JsonBotRepository()
         {
-            _myDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            
+            var myDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
             // Get the application directory
-            _configFilePath = Path.Combine(_myDocumentsFolder, "upeko.json");
+            _configFilePath = Path.Combine(myDocumentsFolder, "upeko", "upeko.json");
 
             // Get the MyDocuments folder path
-            var updaterFolder = Path.Combine(_myDocumentsFolder, "NadekoBotUpdater");
+            var updaterFolder = Path.Combine(myDocumentsFolder, "NadekoBotUpdater");
             _legacyBotsJsonPath = Path.Combine(updaterFolder, "bots.json");
 
             // Initialize the config
@@ -73,21 +72,104 @@ namespace upeko.Services
                         Bots = botModels ?? new List<BotModel>()
                     };
 
+                    // Migrate legacy bot data structure
+                    if (_config.Bots.Count > 0)
+                    {
+                        MigrateLegacyBotData(_config.Bots);
+                    }
+
                     // Save the new config
                     SaveConfig();
 
                     return;
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     // If there's an error reading the file, continue to the next option
                     // todo: Show an error message box
+                    Console.WriteLine($"Error migrating legacy bots: {ex.Message}");
                 }
             }
 
             // If no existing config is found, create a default one
             _config = new ConfigModel();
             SaveConfig();
+        }
+
+        private void MigrateLegacyBotData(List<BotModel> bots)
+        {
+            foreach (var bot in bots)
+            {
+                if (bot.PathUri == null) continue;
+
+                var botPath = bot.PathUri.LocalPath;
+                if (!Directory.Exists(botPath)) continue;
+
+                try
+                {
+                    // 1. Move system/creds.yml to system/data/creds.yml if it exists
+                    var systemFolder = Path.Combine(botPath, "system");
+                    var systemDataFolder = Path.Combine(systemFolder, "data");
+                    var oldCredsPath = Path.Combine(systemFolder, "creds.yml");
+                    var newCredsPath = Path.Combine(systemDataFolder, "creds.yml");
+
+                    if (File.Exists(oldCredsPath) && Directory.Exists(systemDataFolder))
+                    {
+                        // Ensure target directory exists
+                        Directory.CreateDirectory(Path.GetDirectoryName(newCredsPath)!);
+                        
+                        // Move the file
+                        if (!File.Exists(newCredsPath))
+                        {
+                            File.Move(oldCredsPath, newCredsPath);
+                        }
+                        else
+                        {
+                            // If file already exists at destination, make a backup and replace
+                            var backupPath = newCredsPath + ".bak";
+                            if (File.Exists(backupPath))
+                                File.Delete(backupPath);
+                                
+                            File.Move(newCredsPath, backupPath);
+                            File.Move(oldCredsPath, newCredsPath);
+                        }
+                    }
+
+                    // 2. Move system/data folder contents to the base folder
+                    if (Directory.Exists(systemDataFolder))
+                    {
+                        // Create data folder in base directory if it doesn't exist
+                        var baseDataFolder = Path.Combine(botPath, "data");
+                        if (Directory.Exists(baseDataFolder))
+                        {
+                            Directory.Delete(baseDataFolder, true);
+                        }
+
+                        Directory.Move(systemDataFolder, baseDataFolder);
+                    }
+
+                    // 3. Remove all Windows shortcuts in the base folder
+                    foreach (var file in Directory.GetFiles(botPath, "*.lnk"))
+                    {
+                        File.Delete(file);
+                    }
+
+                    // 4. Remove the system folder
+                    if (Directory.Exists(systemFolder))
+                    {
+                        // Make sure we're done with all operations before deleting
+                        Directory.Delete(systemFolder, true);
+                    }
+
+                    // 5. Mark migration as complete (optional: could set a flag in the bot model)
+                    Console.WriteLine($"Successfully migrated legacy data for bot at {botPath}");
+                }
+                catch (Exception ex)
+                {
+                    // Log the error but continue with other bots
+                    Console.WriteLine($"Error migrating bot at {botPath}: {ex.Message}");
+                }
+            }
         }
 
         public ConfigModel GetConfig()
