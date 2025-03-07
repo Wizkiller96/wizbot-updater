@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -106,21 +106,45 @@ namespace upeko.ViewModels
 
                     var staticUrl = $"https://www.johnvansickle.com/ffmpeg/old-releases/" +
                                     $"ffmpeg-6.0.1-{arch}-static.tar.xz";
-                    var binFolder = "~/.local/sbin/";
-
+                    
+                    // Ensure the directory exists
+                    var targetDir = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "sbin"));
+                    Directory.CreateDirectory(targetDir);
+                    
+                    // Download the archive
                     using var http = new HttpClient();
                     await using var stream = await http.GetStreamAsync(staticUrl);
                     using var reader = ReaderFactory.Open(stream);
                     var cnt = 0;
                     while (reader.MoveToNextEntry())
                     {
-                        if (reader.Entry.Key is "ffmpeg" or "ffprobe")
+                        if (!reader.Entry.IsDirectory)
                         {
-                            await using var fs = new FileStream(Path.Combine(binFolder, reader.Entry.Key),
-                                FileMode.Create);
-
-                            if (++cnt == 2)
-                                break;
+                            var fileName = Path.GetFileName(reader.Entry.Key);
+                            if (fileName is "ffmpeg" or "ffprobe")
+                            {
+                                var targetPath = Path.Combine(targetDir, fileName);
+                                reader.WriteEntryToFile(targetPath);
+                                cnt++;
+                                
+                                // Set executable permission right after extracting each file
+                                var process = new Process
+                                {
+                                    StartInfo = new ProcessStartInfo
+                                    {
+                                        FileName = "chmod",
+                                        Arguments = $"+x \"{targetPath}\"",
+                                        UseShellExecute = false,
+                                        CreateNoWindow = true
+                                    }
+                                };
+                                
+                                process.Start();
+                                await process.WaitForExitAsync();
+                                
+                                if (cnt >= 2)
+                                    break;
+                            }
                         }
                     }
 

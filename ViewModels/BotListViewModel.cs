@@ -96,17 +96,17 @@ public class BotListViewModel : ViewModelBase
         var botName = $"bot-{first5}";
 
         // Create a default path in the user's documents folder
-        string defaultPath = Path.Combine(
+        var defaultPath = Path.GetFullPath(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Personal),
             "upeko",
-            botName);
+            botName));
 
         // Create a new bot model
         var botModel = new BotModel()
         {
             Guid = guid,
             Name = botName,
-            PathUri = new Uri(defaultPath, UriKind.Absolute)
+            PathUri = defaultPath
         };
 
         // Add the bot to the repository

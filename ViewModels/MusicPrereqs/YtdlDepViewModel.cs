@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
@@ -87,8 +87,32 @@ namespace upeko.ViewModels
                 {
                     using var http = new HttpClient();
                     await using var stream = await http.GetStreamAsync(linuxDlLink);
-                    await using var fs = new FileStream(Path.Combine("~/.local/sbin/", "yt-dlp"), FileMode.Create);
-                    await stream.CopyToAsync(fs);
+
+                    // Ensure the directory exists
+                    var targetDir = Path.GetFullPath(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local", "sbin"));
+                    Directory.CreateDirectory(targetDir);
+
+                    var ytdlpPath = Path.Combine(targetDir, "yt-dlp");
+                    await using (var fs = new FileStream(ytdlpPath, FileMode.Create))
+                    {
+                        await stream.CopyToAsync(fs);
+                    }
+
+                    var process = new Process
+                    {
+                        StartInfo = new ProcessStartInfo
+                        {
+                            FileName = "chmod",
+                            Arguments = $"+x \"{ytdlpPath}\"",
+                            UseShellExecute = false,
+                            CreateNoWindow = true,
+                            RedirectStandardError = true
+                        }
+                    };
+
+                    process.Start();
+                    await process.WaitForExitAsync();
+
                     return true;
                 }
             }

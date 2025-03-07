@@ -29,32 +29,25 @@ namespace upeko.ViewModels
 
         public string BotIcon
         {
-            get => _bot.IconUri?.ToString() ?? "https://cdn.nadeko.bot/other/av_blurred.png";
+            get => _bot.IconUri ?? string.Empty;
             set
             {
-                if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
-                {
-                    _bot.IconUri = uri;
-                    Parent.UpdateBot(_bot);
+                _bot.IconUri = value;
+                Parent.UpdateBot(_bot);
 
-                    this.RaisePropertyChanged();
-                }
+                this.RaisePropertyChanged();
             }
         }
 
         public string BotPath
         {
-            get => Bot.PathUri?.LocalPath ?? string.Empty;
+            get => Bot.PathUri ?? string.Empty;
             set
             {
-                if (Uri.TryCreate(value, UriKind.Absolute, out var uri))
-                {
-                    _bot.PathUri = uri;
-                    Parent.UpdateBot(_bot);
-
-                    this.RaisePropertyChanged();
-                    this.RaisePropertyChanged(nameof(ExecutablePath));
-                }
+                _bot.PathUri = value;
+                Parent.UpdateBot(_bot);
+                this.RaisePropertyChanged();
+                this.RaisePropertyChanged(nameof(ExecutablePath));
             }
         }
 

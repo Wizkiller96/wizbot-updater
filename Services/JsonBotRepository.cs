@@ -94,10 +94,10 @@ namespace upeko.Services
         {
             foreach (var bot in bots)
             {
-                if (bot.PathUri == null)
+                var botPath = bot.PathUri;
+                if (string.IsNullOrWhiteSpace(botPath))
                     continue;
 
-                var botPath = bot.PathUri.LocalPath;
                 if (!Directory.Exists(botPath))
                     continue;
 
@@ -183,8 +183,8 @@ namespace upeko.Services
             if (bot.PathUri is null)
                 return;
 
-            if (!Directory.Exists(bot.PathUri!.LocalPath))
-                Directory.CreateDirectory(bot.PathUri!.LocalPath);
+            if (!Directory.Exists(bot.PathUri))
+                Directory.CreateDirectory(bot.PathUri);
 
             _config.Bots.Add(bot);
             SaveConfig();

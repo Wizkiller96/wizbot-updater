@@ -11,16 +11,15 @@ namespace upeko.Models
 
         public string Name { get; set; } = "New Bot";
 
-        public Uri? IconUri { get; set; }
+        public string? IconUri { get; set; }
 
         public string? Version { get; set; }
 
-        public Uri? PathUri { get; set; }
+        public string? PathUri { get; set; }
     }
 
     [JsonSerializable(typeof(BotModel))]
     [JsonSerializable(typeof(Guid))]
-    [JsonSerializable(typeof(Uri))]
     [JsonSerializable(typeof(ConfigModel))]
     [JsonSerializable(typeof(ReleaseModel))]
     [JsonSerializable(typeof(ReleaseAsset))]
