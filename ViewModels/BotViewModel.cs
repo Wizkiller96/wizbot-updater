@@ -175,6 +175,22 @@ namespace upeko.ViewModels
 
         public IAsyncImageLoader ImageLoader { get; }
 
+        // Added property for editing mode
+        private bool _isEditingName;
+        public bool IsEditingName
+        {
+            get => _isEditingName;
+            set => this.RaiseAndSetIfChanged(ref _isEditingName, value);
+        }
+
+        // Added property for temporarily storing the new name
+        private string _editedName = string.Empty;
+        public string EditedName
+        {
+            get => _editedName;
+            set => this.RaiseAndSetIfChanged(ref _editedName, value);
+        }
+
         #endregion
 
         #region Commands
@@ -191,6 +207,10 @@ namespace upeko.ViewModels
         public ICommand CheckForUpdatesCommand { get; }
         public ICommand UpdateCommand { get; }
         public ICommand SelectAvatarCommand { get; }
+        // Added commands for name editing
+        public ICommand EditNameCommand { get; }
+        public ICommand SaveNameCommand { get; }
+        public ICommand CancelEditNameCommand { get; }
 
         #endregion
 
@@ -213,6 +233,10 @@ namespace upeko.ViewModels
             BackCommand = ReactiveCommand.Create(ExecuteBackCommand);
             SelectBotPathCommand = ReactiveCommand.Create(ExecuteSelectBotPathCommand);
             SelectAvatarCommand = ReactiveCommand.Create(ExecuteSelectAvatarCommand);
+            // Initialize name editing commands
+            EditNameCommand = ReactiveCommand.Create(ExecuteEditNameCommand);
+            SaveNameCommand = ReactiveCommand.Create(ExecuteSaveNameCommand);
+            CancelEditNameCommand = ReactiveCommand.Create(ExecuteCancelEditNameCommand);
 
 
             UpdateChecker.Instance.OnDownloadProgress += OnDownloadProgress;
@@ -591,6 +615,39 @@ namespace upeko.ViewModels
                 // Save the changes to persist the new icon path
                 Parent?.UpdateBot(Bot);
             }
+        }
+
+        /// <summary>
+        /// Starts editing the bot name
+        /// </summary>
+        private void ExecuteEditNameCommand()
+        {
+            EditedName = Name;
+            IsEditingName = true;
+        }
+
+        /// <summary>
+        /// Saves the edited name to the bot model
+        /// </summary>
+        private void ExecuteSaveNameCommand()
+        {
+            if (!string.IsNullOrWhiteSpace(EditedName) && EditedName != Name)
+            {
+                _bot.Name = EditedName;
+                Parent.UpdateBot(_bot);
+                this.RaisePropertyChanged(nameof(Name));
+            }
+            
+            IsEditingName = false;
+        }
+
+        /// <summary>
+        /// Cancels the name editing process
+        /// </summary>
+        private void ExecuteCancelEditNameCommand()
+        {
+            EditedName = Name;
+            IsEditingName = false;
         }
 
         #endregion
