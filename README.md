@@ -25,7 +25,7 @@ Download the latest pre-built binaries for your operating system from the [RELEA
 2. Click the **+** button to create a new bot 
 3. Click "Update" to download the latest version
 4. Once downloaded, click the **Note** icon above RUN to open the creds
-5. Fill in your bot credentials - [guide here](https://nadekobot.readthedocs.io/en/latest/creds-guide/)
+5. Fill in your bot credentials - [guide here](https://docs.nadeko.bot/creds-guide)
 6. Click "Start" to run your new bot
 
 ### Dependencies
