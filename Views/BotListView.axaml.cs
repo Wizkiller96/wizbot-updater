@@ -1,6 +1,6 @@
 ﻿using Avalonia.Controls;
 
-namespace upeko.Views;
+namespace wizbotupdater.Views;
 
 public partial class BotListView : UserControl
 {

@@ -1,9 +1,9 @@
 using System;
 using System.Text.Json.Serialization;
 using CommunityToolkit.Mvvm.ComponentModel;
-using upeko.Services;
+using wizbotupdater.Services;
 
-namespace upeko.Models
+namespace wizbotupdater.Models
 {
     public partial class BotModel
     {

@@ -1,6 +1,6 @@
 ﻿using ReactiveUI;
 
-namespace upeko.ViewModels;
+namespace wizbotupdater.ViewModels;
 
 public class ViewModelBase : ReactiveObject
 {

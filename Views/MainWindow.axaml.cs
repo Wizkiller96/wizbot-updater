@@ -1,7 +1,7 @@
 using Avalonia.ReactiveUI;
-using upeko.ViewModels;
+using wizbotupdater.ViewModels;
 
-namespace upeko.Views;
+namespace wizbotupdater.Views;
 
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 {

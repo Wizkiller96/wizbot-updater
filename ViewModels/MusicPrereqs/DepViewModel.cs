@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Input;
 using ReactiveUI;
 
-namespace upeko.ViewModels
+namespace wizbotupdater.ViewModels
 {
     /// <summary>
     /// Base Viewmodel that all bot dependencies inherit from

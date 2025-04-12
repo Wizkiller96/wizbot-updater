@@ -2,12 +2,12 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using ReactiveUI;
-using upeko.Models;
-using upeko.Services;
+using wizbotupdater.Models;
+using wizbotupdater.Services;
 using System.IO;
 using AsyncImageLoader;
 
-namespace upeko.ViewModels;
+namespace wizbotupdater.ViewModels;
 
 public class BotListViewModel : ViewModelBase
 {
@@ -98,7 +98,7 @@ public class BotListViewModel : ViewModelBase
         // Create a default path in the user's documents folder
         var defaultPath = Path.GetFullPath(Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.Personal),
-            "upeko",
+            "wizbotupdater",
             botName));
 
         // Create a new bot model

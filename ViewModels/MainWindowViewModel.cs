@@ -8,21 +8,21 @@ using System.Threading.Tasks;
 using AsyncImageLoader;
 using System;
 using System.Reflection;
-using upeko.Services;
+using wizbotupdater.Services;
 using System.Net.Http.Json;
-using upeko.Models;
+using wizbotupdater.Models;
 
-namespace upeko.ViewModels;
+namespace wizbotupdater.ViewModels;
 
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly FfmpegDepViewModel _ffmpegViewModel;
     private readonly YtdlDepViewModel _ytdlpViewModel;
     private readonly IAsyncImageLoader _imageLoaderService;
-    private const string ChangelogUrl = "https://github.com/nadeko-bot/nadekobot/blob/v6/CHANGELOG.md";
-    private const string UpEkoReleaseUrl = "https://github.com/nadeko-bot/upeko/releases";
+    private const string ChangelogUrl = "https://github.com/Wizkiller96/WizBot/blob/v6/CHANGELOG.md";
+    private const string WizBotUpdaterReleaseUrl = "https://github.com/Wizkiller96/wizbotupdater/releases";
     private bool _isDarkTheme;
-    private bool _isUpEkoUpdateAvailable;
+    private bool _isWizBotUpdaterUpdateAvailable;
     private string _currentVersion;
 
     public BotListViewModel Bots { get; } = new();
@@ -42,7 +42,7 @@ public partial class MainWindowViewModel : ViewModelBase
     public ICommand OpenChangelogCommand { get; }
     public ICommand ToggleThemeCommand { get; }
     public ICommand OpenDiscordCommand { get; }
-    public ICommand OpenUpEkoReleaseCommand { get; }
+    public ICommand OpenWizBotUpdaterReleaseCommand { get; }
 
     public bool IsDarkTheme
     {
@@ -52,10 +52,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public string ThemeButtonText => IsDarkTheme ? "Light Theme" : "Dark Theme";
 
-    public bool IsUpEkoUpdateAvailable
+    public bool IsWizBotUpdaterUpdateAvailable
     {
-        get => _isUpEkoUpdateAvailable;
-        set => this.RaiseAndSetIfChanged(ref _isUpEkoUpdateAvailable, value);
+        get => _isWizBotUpdaterUpdateAvailable;
+        set => this.RaiseAndSetIfChanged(ref _isWizBotUpdaterUpdateAvailable, value);
     }
 
     public string CurrentVersion => _currentVersion;
@@ -80,7 +80,7 @@ public partial class MainWindowViewModel : ViewModelBase
         OpenChangelogCommand = ReactiveCommand.Create(OpenChangelog);
         ToggleThemeCommand = ReactiveCommand.Create(ToggleTheme);
         OpenDiscordCommand = ReactiveCommand.Create(OpenDiscord);
-        OpenUpEkoReleaseCommand = ReactiveCommand.Create(OpenUpEkoReleasePage);
+        OpenWizBotUpdaterReleaseCommand = ReactiveCommand.Create(OpenWizBotUpdaterReleasePage);
 
         // Run the check methods for ffmpeg and ytdlp view models when the app starts
         // Use Dispatcher to ensure UI updates happen on the UI thread
@@ -93,8 +93,8 @@ public partial class MainWindowViewModel : ViewModelBase
             await _ffmpegViewModel.CheckAsync();
             await _ytdlpViewModel.CheckAsync();
             
-            // Check for Upeko updates
-            await CheckForUpEkoUpdatesAsync();
+            // Check for WizBot Updater updates
+            await CheckForWizBotUpdaterUpdatesAsync();
         });
 
         // Set up property changed notification for ThemeButtonText when IsDarkTheme changes
@@ -127,33 +127,33 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var psi = new ProcessStartInfo
         {
-            FileName = "https://discord.gg/nadekobot",
+            FileName = "https://discord.gg/0YNaDOYuD5QOpeNI",
             UseShellExecute = true
         };
         
         Process.Start(psi);
     }
 
-    private void OpenUpEkoReleasePage()
+    private void OpenWizBotUpdaterReleasePage()
     {
         var psi = new ProcessStartInfo
         {
-            FileName = UpEkoReleaseUrl,
+            FileName = WizBotUpdaterReleaseUrl,
             UseShellExecute = true
         };
         
         Process.Start(psi);
     }
 
-    private async Task CheckForUpEkoUpdatesAsync()
+    private async Task CheckForWizBotUpdaterUpdatesAsync()
     {
         try
         {
-            // Create a custom UpdateChecker for Upeko
+            // Create a custom UpdateChecker for WizBot Updater
             var httpClient = new System.Net.Http.HttpClient();
-            httpClient.DefaultRequestHeaders.Add("User-Agent", "Upeko-Update-Checker");
+            httpClient.DefaultRequestHeaders.Add("User-Agent", "WizBot-Updater-Update-Checker");
             
-            var response = await httpClient.GetAsync("https://api.github.com/repos/nadeko-bot/upeko/releases/latest");
+            var response = await httpClient.GetAsync("https://api.github.com/repos/Wizkiller96/wizbot-updater/releases/latest");
             response.EnsureSuccessStatusCode();
             
             var newRelease = await response.Content.ReadFromJsonAsync(SourceJsonSerializer.Default.ReleaseModel);
@@ -161,14 +161,14 @@ public partial class MainWindowViewModel : ViewModelBase
             if (newRelease != null)
             {
                 var latestVersion = newRelease.TagName?.TrimStart('v') ?? "1.0.0.0";
-                IsUpEkoUpdateAvailable = CompareVersions(_currentVersion, latestVersion) < 0;
+                IsWizBotUpdaterUpdateAvailable = CompareVersions(_currentVersion, latestVersion) < 0;
             }
         }
         catch (Exception ex)
         {
             // Log the error but don't display it to the user
             Debug.WriteLine($"Error checking for updates: {ex.Message}");
-            IsUpEkoUpdateAvailable = false;
+            IsWizBotUpdaterUpdateAvailable = false;
         }
     }
 

@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:vm="clr-namespace:upeko.ViewModels"
+             xmlns:vm="clr-namespace:wizbotupdater.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:DataType="vm:DepViewModel"
-             x:Class="upeko.Views.DepButtonView">
+             x:Class="wizbotupdater.Views.DepButtonView">
     <UserControl.Resources>
         <!-- Define reliable colors that work in both light and dark themes -->
         <Color x:Key="WarningColor">Orange</Color>

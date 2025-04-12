@@ -1,4 +1,4 @@
-namespace upeko;
+namespace wizbotupdater;
 /// <summary>
 /// Defines which states the bot can be in
 /// </summary>

@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:upeko.ViewModels"
+             xmlns:viewModels="clr-namespace:wizbotupdater.ViewModels"
              xmlns:asyncImageLoader="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
              mc:Ignorable="d"
-             x:Class="upeko.Views.BotView"
+             x:Class="wizbotupdater.Views.BotView"
              x:DataType="viewModels:BotViewModel">
     <Grid RowDefinitions="Auto,*,Auto">
         <!-- Header -->

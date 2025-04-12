@@ -4,7 +4,7 @@ using System.Windows.Input;
 using Avalonia.Media;
 using ReactiveUI;
 
-namespace upeko.ViewModels;
+namespace wizbotupdater.ViewModels;
 
 public class BotItemViewModel : ViewModelBase, IDisposable
 {

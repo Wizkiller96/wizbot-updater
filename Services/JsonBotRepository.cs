@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using upeko.Models;
+using wizbotupdater.Models;
 
-namespace upeko.Services
+namespace wizbotupdater.Services
 {
     public class JsonBotRepository : IBotRepository
     {
@@ -22,10 +22,10 @@ namespace upeko.Services
             var myDocumentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             // Get the application directory
-            _configFilePath = Path.Combine(myDocumentsFolder, "upeko", "upeko.json");
+            _configFilePath = Path.Combine(myDocumentsFolder, "wizbotupdater", "wizbotupdater.json");
 
             // Get the MyDocuments folder path
-            var updaterFolder = Path.Combine(myDocumentsFolder, "NadekoBotUpdater");
+            var updaterFolder = Path.Combine(myDocumentsFolder, "WizBotUpdater");
             _legacyBotsJsonPath = Path.Combine(updaterFolder, "bots.json");
 
             // Initialize the config
@@ -34,7 +34,7 @@ namespace upeko.Services
 
         private void InitializeConfig()
         {
-            // Check if upeko.json exists in the application directory
+            // Check if wizbotupdater.json exists in the application directory
             if (File.Exists(_configFilePath))
             {
                 try
@@ -52,7 +52,7 @@ namespace upeko.Services
                 }
             }
 
-            // Check if bots.json exists in the NadekoBotUpdater folder
+            // Check if bots.json exists in the WizBotUpdater folder
             if (File.Exists(_legacyBotsJsonPath))
             {
                 try

@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 using Avalonia.Media;
 using Avalonia.Interactivity;
 using ReactiveUI;
-using upeko.Services;
+using wizbotupdater.Services;
 using System.Windows.Input;
 using Avalonia.Controls;
 using AsyncImageLoader;
-using upeko.Models;
+using wizbotupdater.Models;
 
-namespace upeko.ViewModels
+namespace wizbotupdater.ViewModels
 {
     /// <summary>
     /// ViewModel for bot management and interaction

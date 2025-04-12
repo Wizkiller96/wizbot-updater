@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 
-namespace upeko.Services
+namespace wizbotupdater.Services
 {
     public interface IDialogService
     {

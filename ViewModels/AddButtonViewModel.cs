@@ -1,7 +1,7 @@
 using System.Windows.Input;
 using ReactiveUI;
 
-namespace upeko.ViewModels;
+namespace wizbotupdater.ViewModels;
 
 public class AddButtonViewModel : ViewModelBase
 {

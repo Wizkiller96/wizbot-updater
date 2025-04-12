@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace upeko.Services;
+namespace wizbotupdater.Services;
 
 /// <summary>
 /// Model representing a GitHub release asset (downloadable file).

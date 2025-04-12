@@ -40,22 +40,22 @@ jobs:
     - name: Rename executable for Windows
       if: startsWith(github.ref, 'refs/tags/') && contains(matrix.runtime, 'win')
       run: |
-        mkdir -p upeko-${{ matrix.runtime }}
-        cp publish-output/upeko.exe upeko-${{ matrix.runtime }}/upeko-${{ matrix.runtime }}.exe
+        mkdir -p wizbotupdater-${{ matrix.runtime }}
+        cp publish-output/wizbotupdater.exe wizbotupdater-${{ matrix.runtime }}/wizbotupdater-${{ matrix.runtime }}.exe
 
     - name: Rename executable for Linux/Mac
       if: startsWith(github.ref, 'refs/tags/') && (contains(matrix.runtime, 'linux') || contains(matrix.runtime, 'osx'))
       run: |
-        mkdir -p upeko-${{ matrix.runtime }}
-        cp publish-output/upeko upeko-${{ matrix.runtime }}/upeko-${{ matrix.runtime }}
-        chmod +x upeko-${{ matrix.runtime }}/upeko-${{ matrix.runtime }}
+        mkdir -p wizbotupdater-${{ matrix.runtime }}
+        cp publish-output/wizbotupdater wizbotupdater-${{ matrix.runtime }}/wizbotupdater-${{ matrix.runtime }}
+        chmod +x wizbotupdater-${{ matrix.runtime }}/wizbotupdater-${{ matrix.runtime }}
 
     - name: Upload Artifact
       if: startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
       with:
-        name: upeko-${{ matrix.runtime }}
-        path: upeko-${{ matrix.runtime }}
+        name: wizbotupdater-${{ matrix.runtime }}
+        path: wizbotupdater-${{ matrix.runtime }}
 
   create-release:
     name: Create Release
@@ -67,7 +67,7 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: 'upeko-*'
+          pattern: 'wizbotupdater-*'
           path: artifacts
 
       - name: Create Release
@@ -77,14 +77,14 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: upeko v${{ github.ref_name }}
+          name: wizbotupdater v${{ github.ref_name }}
           generate_release_notes: true
           draft: false
           prerelease: false
           files: |
-            artifacts/upeko-linux-x64/upeko-linux-x64
-            artifacts/upeko-linux-arm64/upeko-linux-arm64
-            artifacts/upeko-win-x64/upeko-win-x64.exe
-            artifacts/upeko-win-arm64/upeko-win-arm64.exe
-            artifacts/upeko-osx-x64/upeko-osx-x64
-            artifacts/upeko-osx-arm64/upeko-osx-arm64
+            artifacts/wizbotupdater-linux-x64/wizbotupdater-linux-x64
+            artifacts/wizbotupdater-linux-arm64/wizbotupdater-linux-arm64
+            artifacts/wizbotupdater-win-x64/wizbotupdater-win-x64.exe
+            artifacts/wizbotupdater-win-arm64/wizbotupdater-win-arm64.exe
+            artifacts/wizbotupdater-osx-x64/wizbotupdater-osx-x64
+            artifacts/wizbotupdater-osx-arm64/wizbotupdater-osx-arm64

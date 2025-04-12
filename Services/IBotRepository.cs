@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using upeko.Models;
+using wizbotupdater.Models;
 
-namespace upeko.Services
+namespace wizbotupdater.Services
 {
     public interface IBotRepository
     {

@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
-namespace upeko.ViewModels
+namespace wizbotupdater.ViewModels
 {
     /// <summary>
     /// Viewmodel for YoutubeDL bot dependency

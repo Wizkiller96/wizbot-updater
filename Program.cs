@@ -2,7 +2,7 @@
 using System;
 using Avalonia.ReactiveUI;
 
-namespace upeko;
+namespace wizbotupdater;
 
 sealed class Program
 {

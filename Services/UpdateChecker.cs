@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using System.IO;
 using System.IO.Compression;
 using System.Diagnostics;
-using upeko.Models;
+using wizbotupdater.Models;
 
-namespace upeko.Services
+namespace wizbotupdater.Services
 {
     /// <summary>
     /// A singleton service that checks for bot updates using the GitHub API.
@@ -43,7 +43,7 @@ namespace upeko.Services
         #region Properties and Fields
 
         private readonly HttpClient _httpClient;
-        private const string GitHubApiUrl = "https://api.github.com/repos/nadeko-bot/nadekobot/releases/latest";
+        private const string GitHubApiUrl = "https://api.github.com/repos/Wizkiller96/WizBot/releases/latest";
 
         /// <summary>
         /// The latest available release from GitHub.
@@ -81,7 +81,7 @@ namespace upeko.Services
         {
             // Private constructor to enforce singleton pattern
             _httpClient = new HttpClient();
-            _httpClient.DefaultRequestHeaders.Add("User-Agent", "Upeko-Bot-Updater");
+            _httpClient.DefaultRequestHeaders.Add("User-Agent", "WizBot-Updater");
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace upeko.Services
                 var extension = os == "win" ? ".zip" : ".tar.gz";
 
                 // Find the appropriate asset
-                var assetName = $"nadeko-{os}-{arch}{extension}";
+                var assetName = $"wizbot-{os}-{arch}{extension}";
                 var asset = Array.Find(LatestRelease.Assets,
                     a => a.Name?.Equals(assetName, StringComparison.OrdinalIgnoreCase) == true);
 
@@ -291,7 +291,7 @@ namespace upeko.Services
                 }
 
                 // Move the extracted files to the installation directory
-                Directory.Move(Path.Combine(extractPath, $"nadeko-{os}-{arch}"), botPath);
+                Directory.Move(Path.Combine(extractPath, $"wizbot-{os}-{arch}"), botPath);
 
                 // If there's a data directory in the old installation, copy it to the new one
                 var oldDataPath = Path.Combine(backupPath, "data");

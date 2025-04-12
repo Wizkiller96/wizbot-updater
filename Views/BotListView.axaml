@@ -2,10 +2,10 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:upeko.ViewModels"
-             xmlns:views="clr-namespace:upeko.Views"
+             xmlns:viewModels="clr-namespace:wizbotupdater.ViewModels"
+             xmlns:views="clr-namespace:wizbotupdater.Views"
              mc:Ignorable="d"
-             x:Class="upeko.Views.BotListView"
+             x:Class="wizbotupdater.Views.BotListView"
              x:DataType="viewModels:BotListViewModel"
              Height="400">
     <ContentControl Content="{Binding CurrentPage}">

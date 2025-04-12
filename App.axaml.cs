@@ -6,13 +6,13 @@ using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Microsoft.Extensions.DependencyInjection;
-using upeko.Services;
-using upeko.ViewModels;
-using upeko.Views;
+using wizbotupdater.Services;
+using wizbotupdater.ViewModels;
+using wizbotupdater.Views;
 using AsyncImageLoader.Loaders;
 using AsyncImageLoader;
 
-namespace upeko;
+namespace wizbotupdater;
 
 public partial class App : Application
 {
@@ -39,7 +39,7 @@ public partial class App : Application
 
         // Register the ImageLoaderService as a singleton
         services.AddSingleton<IAsyncImageLoader>(
-            new DiskCachedWebImageLoader(Path.Combine(Path.GetFullPath(Path.GetTempPath()), "upeko-cache")));
+            new DiskCachedWebImageLoader(Path.Combine(Path.GetFullPath(Path.GetTempPath()), "wizbotupdater-cache")));
     }
 
     public override void OnFrameworkInitializationCompleted()

@@ -1,8 +1,8 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using upeko.ViewModels;
+using wizbotupdater.ViewModels;
 
-namespace upeko.Views
+namespace wizbotupdater.Views
 {
     public partial class BotView : UserControl
     {

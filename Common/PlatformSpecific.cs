@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace upeko;
+namespace wizbotupdater;
 
 public static class PlatformSpecific
 {
@@ -20,9 +20,9 @@ public static class PlatformSpecific
     {
         return Environment.OSVersion.Platform switch
         {
-            PlatformID.Win32NT => "NadekoBot.exe",
-            PlatformID.Unix => "NadekoBot",
-            PlatformID.MacOSX => "NadekoBot",
+            PlatformID.Win32NT => "WizBot.exe",
+            PlatformID.Unix => "WizBot",
+            PlatformID.MacOSX => "WizBot",
             _ => throw new PlatformNotSupportedException("Unsupported platform: " + Environment.OSVersion.Platform)
         };
     }

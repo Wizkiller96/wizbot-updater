@@ -1,9 +1,9 @@
 using System;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using upeko.ViewModels;
+using wizbotupdater.ViewModels;
 
-namespace upeko;
+namespace wizbotupdater;
 
 public class ViewLocator : IDataTemplate
 {

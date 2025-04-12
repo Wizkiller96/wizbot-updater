@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using SharpCompress.Readers;
 
-namespace upeko.ViewModels
+namespace wizbotupdater.ViewModels
 {
     /// <summary>
     /// Viewmodel for FFMPEG bot dependency
