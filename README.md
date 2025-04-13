@@ -73,7 +73,7 @@ dotnet run
 
 ## Troubleshooting
 
-Join our [discord](https://wizbot.cc/discord and ask for help in the `#help` channel.
+Join our [discord](https://wizbot.cc/discord) and ask for help in the `#help` channel.
 
 ## License
 
